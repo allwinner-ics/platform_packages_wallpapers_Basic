@@ -17,24 +17,7 @@
 #pragma stateFragment(PFBackground)
 #pragma stateStore(PFSBackground)
 
-#define RSID_STATE 0
-#define RSID_BLADES 1
 #define RSID_BLADES_BUFFER 2
-
-#define BLADE_STRUCT_FIELDS_COUNT 13
-#define BLADE_STRUCT_ANGLE 0
-#define BLADE_STRUCT_SIZE 1
-#define BLADE_STRUCT_XPOS 2
-#define BLADE_STRUCT_YPOS 3
-#define BLADE_STRUCT_OFFSET 4
-#define BLADE_STRUCT_SCALE 5
-#define BLADE_STRUCT_LENGTHX 6
-#define BLADE_STRUCT_LENGTHY 7
-#define BLADE_STRUCT_HARDNESS 8
-#define BLADE_STRUCT_H 9
-#define BLADE_STRUCT_S 10
-#define BLADE_STRUCT_B 11
-#define BLADE_STRUCT_TURBULENCEX 12
 
 #define TESSELATION 0.5f
 #define HALF_TESSELATION 0.25f
@@ -47,6 +30,21 @@
 #define HALF_PI 1.570796326f
 
 #define REAL_TIME 1
+
+void updateBlades()
+{
+    int bladesCount = State->bladesCount;
+    struct Blades_s *bladeStruct = Blades;
+
+    int i;
+    for (i = 0; i < bladesCount; i ++) {
+        float xpos = randf2(-State->width, State->width);
+        bladeStruct->xPos = xpos;
+        bladeStruct->turbulencex = xpos * 0.006f;
+        bladeStruct->yPos = State->height;
+        bladeStruct++;
+    }
+}
 
 float time(int isPreview) {
     if (REAL_TIME && !isPreview) {
@@ -88,44 +86,32 @@ void drawSunset(int width, int height) {
     drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
-int drawBlade(float *bladeStruct, float *bladeBuffer, int *bladeColor,
+int drawBlade(struct Blades_s *bladeStruct, float *bladeBuffer, int *bladeColor,
         float brightness, float xOffset, float now) {
 
-    float offset = bladeStruct[BLADE_STRUCT_OFFSET];
-    float scale = bladeStruct[BLADE_STRUCT_SCALE];
-    float angle = bladeStruct[BLADE_STRUCT_ANGLE];
-    float hardness = bladeStruct[BLADE_STRUCT_HARDNESS];
-    float turbulenceX = bladeStruct[BLADE_STRUCT_TURBULENCEX];
+    float scale = bladeStruct->scale;
+    float angle = bladeStruct->angle;
+    float xpos = bladeStruct->xPos + xOffset;
+    int size = bladeStruct->size;
 
-    float xpos = bladeStruct[BLADE_STRUCT_XPOS] + xOffset;
-    float ypos = bladeStruct[BLADE_STRUCT_YPOS];
+    int color = hsbToAbgr(bladeStruct->h, bladeStruct->s,
+                          lerpf(0, bladeStruct->b, brightness), 1.0f);
 
-    float lengthX = bladeStruct[BLADE_STRUCT_LENGTHX];
-    float lengthY = bladeStruct[BLADE_STRUCT_LENGTHY];
-
-    int size = bladeStruct[BLADE_STRUCT_SIZE];
-
-    float h = bladeStruct[BLADE_STRUCT_H];
-    float s = bladeStruct[BLADE_STRUCT_S];
-    float b = bladeStruct[BLADE_STRUCT_B];
-
-    int color = hsbToAbgr(h, s, lerpf(0, b, brightness), 1.0f);
-
-    float newAngle = (turbulencef2(turbulenceX, now, 4.0f) - 0.5f) * 0.5f;
-    angle = clampf(angle + (newAngle + offset - angle) * 0.15f, -MAX_BEND, MAX_BEND);
+    float newAngle = (turbulencef2(bladeStruct->turbulencex, now, 4.0f) - 0.5f) * 0.5f;
+    angle = clampf(angle + (newAngle + bladeStruct->offset - angle) * 0.15f, -MAX_BEND, MAX_BEND);
 
     float currentAngle = HALF_PI;
 
     float bottomX = xpos;
-    float bottomY = ypos;
+    float bottomY = bladeStruct->yPos;
 
-    float d = angle * hardness;
+    float d = angle * bladeStruct->hardness;
 
     int triangles = size * 2;
 
     for ( ; size > 0; size -= 1) {
-        float topX = bottomX - cosf_fast(currentAngle) * lengthX;
-        float topY = bottomY - sinf_fast(currentAngle) * lengthY;
+        float topX = bottomX - cosf_fast(currentAngle) * bladeStruct->lengthX;
+        float topY = bottomY - sinf_fast(currentAngle) * bladeStruct->lengthY;
 
         float si = size * scale;
         float spi = si - scale;
@@ -180,7 +166,7 @@ int drawBlade(float *bladeStruct, float *bladeBuffer, int *bladeColor,
         currentAngle += d;
     }
 
-    bladeStruct[BLADE_STRUCT_ANGLE] = angle;
+    bladeStruct->angle = angle;
 
     // 3 vertices per triangle, 5 properties per vertex (RGBA, X, Y, S, T)
     return triangles * 15;
@@ -194,7 +180,7 @@ void drawBlades(float brightness, float xOffset) {
     int trianglesCount = State->trianglesCount;
 
     int i = 0;
-    float *bladeStruct = loadArrayF(RSID_BLADES, 0);
+    struct Blades_s *bladeStruct = Blades;
     float *bladeBuffer = loadArrayF(RSID_BLADES_BUFFER, 0);
     int *bladeColor = loadArrayI32(RSID_BLADES_BUFFER, 0);
 
@@ -204,7 +190,7 @@ void drawBlades(float brightness, float xOffset) {
         int offset = drawBlade(bladeStruct, bladeBuffer, bladeColor, brightness, xOffset, now);
         bladeBuffer += offset;
         bladeColor += offset;
-        bladeStruct += BLADE_STRUCT_FIELDS_COUNT;
+        bladeStruct ++;
     }
 
     uploadToBufferObject(NAMED_BladesBuffer);

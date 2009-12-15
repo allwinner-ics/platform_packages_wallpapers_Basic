@@ -63,23 +63,26 @@ class GrassRS extends RenderScriptScene {
     private static final int RSID_STATE = 0;
     private static final int RSID_BLADES = 1;
     private static final int BLADES_COUNT = 200;
-    private static final int BLADE_STRUCT_FIELDS_COUNT = 13;
-    private static final int BLADE_STRUCT_ANGLE = 0;
-    private static final int BLADE_STRUCT_SIZE = 1;
-    private static final int BLADE_STRUCT_XPOS = 2;
-    private static final int BLADE_STRUCT_YPOS = 3;
-    private static final int BLADE_STRUCT_OFFSET = 4;
-    private static final int BLADE_STRUCT_SCALE = 5;
-    private static final int BLADE_STRUCT_LENGTHX = 6;
-    private static final int BLADE_STRUCT_LENGTHY = 7;
-    private static final int BLADE_STRUCT_HARDNESS = 8;
-    private static final int BLADE_STRUCT_H = 9;
-    private static final int BLADE_STRUCT_S = 10;
-    private static final int BLADE_STRUCT_B = 11;
-    private static final int BLADE_STRUCT_TURBULENCEX = 12;
+
+    class BladesStruct {
+        public float angle;
+        public int size;
+        public float xPos;
+        public float yPos;
+        public float offset;
+        public float scale;
+        public float lengthX;
+        public float lengthY;
+        public float hardness;
+        public float h;
+        public float s;
+        public float b;
+        public float turbulencex;
+    };
 
     private static final int RSID_BLADES_BUFFER = 2;
 
+    private ScriptC.Invokable mUpdateBladesInvokable;
     @SuppressWarnings({ "FieldCanBeLocal" })
     private ProgramFragment mPfBackground;
     @SuppressWarnings({ "FieldCanBeLocal" })
@@ -97,13 +100,14 @@ class GrassRS extends RenderScriptScene {
     private Type mStateType;
     private Allocation mState;
 
+    private Type mBladesType;
     private Allocation mBlades;
     private Allocation mBladesBuffer;
     @SuppressWarnings({"FieldCanBeLocal"})
     private SimpleMesh mBladesMesh;
 
+
     private int mTriangles;
-    private float[] mBladesData;
     private final float[] mFloatData5 = new float[5];
 
     private WorldState mWorldState;
@@ -168,12 +172,7 @@ class GrassRS extends RenderScriptScene {
         mWorldState.height = height;
         mState.data(mWorldState);
 
-        final float[] blades = mBladesData;
-        for (int i = 0; i < blades.length; i+= BLADE_STRUCT_FIELDS_COUNT) {
-            updateBlade(blades, i);
-        }
-        mBlades.data(blades);
-
+        mUpdateBladesInvokable.execute();
         mPvOrthoAlloc.setupOrthoWindow(width, height);
     }
 
@@ -187,8 +186,10 @@ class GrassRS extends RenderScriptScene {
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setType(mStateType, "State", RSID_STATE);
+        sb.setType(mBladesType, "Blades", RSID_BLADES);
         sb.setScript(mResources, R.raw.grass);
         sb.setRoot(true);
+        mUpdateBladesInvokable = sb.addInvokable("updateBlades");
 
         ScriptC script = sb.create();
         script.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -246,18 +247,16 @@ class GrassRS extends RenderScriptScene {
     private void createBlades() {
         int triangles = 0;
 
-        mBladesData = new float[BLADES_COUNT * BLADE_STRUCT_FIELDS_COUNT];
+        mBladesType = Type.createFromClass(mRS, BladesStruct.class, BLADES_COUNT, "Blade");
+        mBlades = Allocation.createTyped(mRS, mBladesType);
+        BladesStruct bs = new BladesStruct();
 
-        final float[] blades = mBladesData;
-        for (int i = 0; i < blades.length; i+= BLADE_STRUCT_FIELDS_COUNT) {
-            triangles += createBlade(blades, i);
+        for (int i = 0; i < BLADES_COUNT; i++) {
+            triangles += createBlade(bs);
+            mBlades.subData(i, bs);
         }
 
-        mBlades = Allocation.createSized(mRS, USER_F32(mRS), blades.length);
-        mBlades.data(blades);
-
         mTriangles = triangles;
-
         createMesh(triangles);
     }
 
@@ -316,35 +315,27 @@ class GrassRS extends RenderScriptScene {
         }
     }
 
-    private void updateBlade(float[] blades, int index) {
-        final int xpos = random(-mWidth, mWidth);
-        blades[index + BLADE_STRUCT_XPOS] = xpos;
-        blades[index + BLADE_STRUCT_TURBULENCEX] = xpos * 0.006f;
-        blades[index + BLADE_STRUCT_YPOS] = mHeight;
-    }
-
-    private int createBlade(float[] blades, int index) {
+    private int createBlade(BladesStruct blades) {
         final float size = random(4.0f) + 4.0f;
         final int xpos = random(-mWidth, mWidth);
 
         //noinspection PointlessArithmeticExpression
-        blades[index + BLADE_STRUCT_ANGLE] = 0.0f;
-        blades[index + BLADE_STRUCT_SIZE] = size / TESSELATION;
-        blades[index + BLADE_STRUCT_XPOS] = xpos;
-        blades[index + BLADE_STRUCT_YPOS] = mHeight;
-        blades[index + BLADE_STRUCT_OFFSET] = random(0.2f) - 0.1f;
-        blades[index + BLADE_STRUCT_SCALE] = 4.0f / (size / TESSELATION) +
-                (random(0.6f) + 0.2f) * TESSELATION;
-        blades[index + BLADE_STRUCT_LENGTHX] = (random(4.5f) + 3.0f) * TESSELATION * size;
-        blades[index + BLADE_STRUCT_LENGTHY] = (random(5.5f) + 2.0f) * TESSELATION * size;
-        blades[index + BLADE_STRUCT_HARDNESS] = (random(1.0f) + 0.2f) * TESSELATION;
-        blades[index + BLADE_STRUCT_H] = random(0.02f) + 0.2f;
-        blades[index + BLADE_STRUCT_S] = random(0.22f) + 0.78f;
-        blades[index + BLADE_STRUCT_B] = random(0.65f) + 0.35f;
-        blades[index + BLADE_STRUCT_TURBULENCEX] = xpos * 0.006f;
+        blades.angle = 0.0f;
+        blades.size = (int)(size / TESSELATION);
+        blades.xPos = xpos;
+        blades.yPos = mHeight;
+        blades.offset = random(0.2f) - 0.1f;
+        blades.scale = 4.0f / (size / TESSELATION) + (random(0.6f) + 0.2f) * TESSELATION;
+        blades.lengthX = (random(4.5f) + 3.0f) * TESSELATION * size;
+        blades.lengthY = (random(5.5f) + 2.0f) * TESSELATION * size;
+        blades.hardness = (random(1.0f) + 0.2f) * TESSELATION;
+        blades.h = random(0.02f) + 0.2f;
+        blades.s = random(0.22f) + 0.78f;
+        blades.b = random(0.65f) + 0.35f;
+        blades.turbulencex = xpos * 0.006f;
 
         // Each blade is made of "size" quads, so we double to count the triangles
-        return (int) (blades[index + BLADE_STRUCT_SIZE]) * 2;
+        return blades.size * 2;
     }
 
     private void loadTextures() {
