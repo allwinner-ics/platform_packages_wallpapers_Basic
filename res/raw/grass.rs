@@ -188,7 +188,7 @@ int drawBlade(float *bladeStruct, float *bladeBuffer, int *bladeColor,
 
 void drawBlades(float brightness, float xOffset) {
     // For anti-aliasing
-    bindTexture(NAMED_PFBackground, 0, NAMED_TAa);
+    bindTexture(NAMED_PFGrass, 0, NAMED_TAa);
 
     int bladesCount = State->bladesCount;
     int trianglesCount = State->trianglesCount;
@@ -262,6 +262,7 @@ int main(int launchID) {
         newB = 0.0f;
     }
 
+    bindProgramFragment(NAMED_PFGrass);
     drawBlades(newB, x);
 
     return 30;

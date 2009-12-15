@@ -53,7 +53,7 @@ class GrassRS extends RenderScriptScene {
     @SuppressWarnings({"UnusedDeclaration"})
     private static final String LOG_TAG = "Grass";
     private static final boolean DEBUG = false;
-    
+
     private static final int LOCATION_UPDATE_MIN_TIME = DEBUG ? 5 * 60 * 1000 : 60 * 60 * 1000; // 1 hour
     private static final int LOCATION_UPDATE_MIN_DISTANCE = DEBUG ? 10 : 150 * 1000; // 150 km
 
@@ -83,11 +83,11 @@ class GrassRS extends RenderScriptScene {
     @SuppressWarnings({ "FieldCanBeLocal" })
     private ProgramFragment mPfBackground;
     @SuppressWarnings({ "FieldCanBeLocal" })
+    private ProgramFragment mPfGrass;
+    @SuppressWarnings({ "FieldCanBeLocal" })
     private ProgramStore mPfsBackground;
     @SuppressWarnings({ "FieldCanBeLocal" })
     private ProgramVertex mPvBackground;
-    @SuppressWarnings({"FieldCanBeLocal"})
-    private Sampler mSampler;
     @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
@@ -132,7 +132,7 @@ class GrassRS extends RenderScriptScene {
             filter.addAction(Intent.ACTION_DATE_CHANGED);
             filter.addAction(Intent.ACTION_TIME_CHANGED);
             filter.addAction(Intent.ACTION_TIMEZONE_CHANGED);
-    
+
             mContext.registerReceiver(mTimezoneTracker, filter);
         }
 
@@ -153,7 +153,7 @@ class GrassRS extends RenderScriptScene {
             mContext.unregisterReceiver(mTimezoneTracker);
             mTimezoneTracker = null;
         }
-        
+
         if (mLocationUpdater != null) {
             mLocationManager.removeUpdates(mLocationUpdater);
             mLocationUpdater = null;
@@ -174,16 +174,16 @@ class GrassRS extends RenderScriptScene {
         }
         mBlades.data(blades);
 
-        mPvOrthoAlloc.setupOrthoWindow(width, height);        
+        mPvOrthoAlloc.setupOrthoWindow(width, height);
     }
 
     @Override
     protected ScriptC createScript() {
         createProgramVertex();
         createProgramFragmentStore();
+        loadTextures();
         createProgramFragment();
         createScriptStructures();
-        loadTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setType(mStateType, "State", RSID_STATE);
@@ -387,14 +387,35 @@ class GrassRS extends RenderScriptScene {
         samplerBuilder.setMag(LINEAR);
         samplerBuilder.setWrapS(WRAP);
         samplerBuilder.setWrapT(WRAP);
-        mSampler = samplerBuilder.create();
+        Sampler sl = samplerBuilder.create();
 
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS, null, null);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(REPLACE, 0);
+        samplerBuilder.setMin(NEAREST);
+        samplerBuilder.setMag(NEAREST);
+        Sampler sn = samplerBuilder.create();
+
+        ProgramFragment.ShaderBuilder builder = new ProgramFragment.ShaderBuilder(mRS);
+        String t = new String("void main() {\n" +
+                              "  vec4 col = varColor;\n" +
+                              "  col.a = texture2D(uni_Tex0, varTex0.xy).a;\n" +
+                              "  gl_FragColor = col;\n" +
+                              "}\n");
+        builder.setTextureCount(1);
+        builder.setShader(t);
+        mPfGrass = builder.create();
+        mPfGrass.setName("PFGrass");
+        mPfGrass.bindSampler(sl, 0);
+
+        builder = new ProgramFragment.ShaderBuilder(mRS);
+        t = new String("void main() {\n" +
+                       "  vec4 col = varColor;\n" +
+                       "  col.rgb = texture2D(uni_Tex0, varTex0.xy).rgb;\n" +
+                       "  gl_FragColor = col;\n" +
+                       "}\n");
+        builder.setTextureCount(1);
+        builder.setShader(t);
         mPfBackground = builder.create();
         mPfBackground.setName("PFBackground");
-        mPfBackground.bindSampler(mSampler, 0);
+        mPfBackground.bindSampler(sn, 0);
     }
 
     private void createProgramFragmentStore() {
