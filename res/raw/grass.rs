@@ -107,58 +107,41 @@ int drawBlade(struct Blades_s *bladeStruct, float *bladeBuffer, int *bladeColor,
 
     float d = angle * bladeStruct->hardness;
 
-    int triangles = size * 2;
+
+    float si = size * scale;
+    float bottomLeft = bottomX - si;
+    float bottomRight = bottomX + si;
+    float bottom = bottomY + HALF_TESSELATION;
+
+    bladeColor[0] = color;                          // V1.ABGR
+    bladeBuffer[1] = bottomLeft;                    // V1.X
+    bladeBuffer[2] = bottom;                        // V1.Y
+    bladeColor[5] = color;                          // V2.ABGR
+    bladeBuffer[6] = bottomRight;                   // V2.X
+    bladeBuffer[7] = bottom;                        // V2.Y
+    bladeBuffer += 10;
+    bladeColor += 10;
 
     for ( ; size > 0; size -= 1) {
         float topX = bottomX - cosf_fast(currentAngle) * bladeStruct->lengthX;
         float topY = bottomY - sinf_fast(currentAngle) * bladeStruct->lengthY;
 
-        float si = size * scale;
+        si = (float)size * scale;
         float spi = si - scale;
 
-        float bottomLeft = bottomX - si;
-        float bottomRight = bottomX + si;
         float topLeft = topX - spi;
         float topRight = topX + spi;
-        float bottom = bottomY + HALF_TESSELATION;
-
-        // First triangle
-        bladeColor[0] = color;                          // V1.ABGR
-
-        bladeBuffer[1] = bottomLeft;                    // V1.X
-        bladeBuffer[2] = bottom;                        // V1.Y
-
-        bladeColor[5] = color;                          // V1.ABGR
-
-        bladeBuffer[6] = topLeft;                       // V2.X
-        bladeBuffer[7] = topY;                          // V2.Y
-
-        bladeColor[10] = color;                         // V3.ABGR
-
-        bladeBuffer[11] = topRight;                     // V3.X
-        bladeBuffer[12] = topY;                         // V3.Y
-
-        // Second triangle
-        bladeBuffer += 15;
-        bladeColor += 15;
 
         bladeColor[0] = color;                          // V1.ABGR
+        bladeBuffer[1] = topLeft;                       // V2.X
+        bladeBuffer[2] = topY;                          // V2.Y
 
-        bladeBuffer[1] = bottomLeft;                    // V1.X
-        bladeBuffer[2] = bottom;                        // V1.Y
+        bladeColor[5] = color;                         // V3.ABGR
+        bladeBuffer[6] = topRight;                     // V3.X
+        bladeBuffer[7] = topY;                         // V3.Y
 
-        bladeColor[5] = color;                          // V2.ABGR
-
-        bladeBuffer[6] = topRight;                      // V2.X
-        bladeBuffer[7] = topY;                          // V2.Y
-
-        bladeColor[10] = color;                         // V3.ABGR
-
-        bladeBuffer[11] = bottomRight;                  // V3.X
-        bladeBuffer[12] = bottom;                       // V3.Y
-
-        bladeBuffer += 15;
-        bladeColor += 15;
+        bladeBuffer += 10;
+        bladeColor += 10;
 
         bottomX = topX;
         bottomY = topY;
@@ -168,8 +151,8 @@ int drawBlade(struct Blades_s *bladeStruct, float *bladeBuffer, int *bladeColor,
 
     bladeStruct->angle = angle;
 
-    // 3 vertices per triangle, 5 properties per vertex (RGBA, X, Y, S, T)
-    return triangles * 15;
+    // 2 vertices per triangle, 5 properties per vertex (RGBA, X, Y, S, T)
+    return bladeStruct->size * 10 + 10;
 }
 
 void drawBlades(float brightness, float xOffset) {
@@ -177,7 +160,6 @@ void drawBlades(float brightness, float xOffset) {
     bindTexture(NAMED_PFGrass, 0, NAMED_TAa);
 
     int bladesCount = State->bladesCount;
-    int trianglesCount = State->trianglesCount;
 
     int i = 0;
     struct Blades_s *bladeStruct = Blades;
@@ -194,7 +176,7 @@ void drawBlades(float brightness, float xOffset) {
     }
 
     uploadToBufferObject(NAMED_BladesBuffer);
-    drawSimpleMeshRange(NAMED_BladesMesh, 0, trianglesCount * 3);
+    drawSimpleMeshRange(NAMED_BladesMesh, 0, State->indexCount);
 }
 
 int main(int launchID) {
@@ -251,5 +233,5 @@ int main(int launchID) {
     bindProgramFragment(NAMED_PFGrass);
     drawBlades(newB, x);
 
-    return 30;
+    return 50;
 }
