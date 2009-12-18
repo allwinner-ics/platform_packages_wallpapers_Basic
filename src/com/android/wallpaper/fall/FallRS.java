@@ -32,7 +32,6 @@ import static android.renderscript.Sampler.Value.WRAP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
 import static android.renderscript.ProgramStore.BlendDstFunc;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
-import static android.renderscript.ProgramFragment.EnvMode.*;
 import static android.renderscript.Element.*;
 
 import android.app.WallpaperManager;
@@ -114,7 +113,7 @@ class FallRS extends RenderScriptScene {
         }
         return null;
     }
-    
+
     @Override
     public void start() {
         super.start();
@@ -280,7 +279,7 @@ class FallRS extends RenderScriptScene {
         mDropState = Allocation.createTyped(mRS, mDropType);
         mDropState.data(mDrop);
     }
-    
+
     private void loadTextures() {
         final Allocation[] textures = new Allocation[TEXTURES_COUNT];
         textures[RSID_TEXTURE_RIVERBED] = loadTexture(R.drawable.pond, "TRiverbed");
@@ -315,16 +314,16 @@ class FallRS extends RenderScriptScene {
         sampleBuilder.setWrapT(WRAP);
         mSampler = sampleBuilder.create();
 
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS, null, null);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(REPLACE, 0);
+        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
+                           ProgramFragment.Builder.Format.RGBA, 0);
         mPfBackground = builder.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
 
-        builder = new ProgramFragment.Builder(mRS, null, null);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(MODULATE, 0);
+        builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
+                           ProgramFragment.Builder.Format.RGBA, 0);
         mPfSky = builder.create();
         mPfSky.setName("PFSky");
         mPfSky.bindSampler(mSampler, 0);

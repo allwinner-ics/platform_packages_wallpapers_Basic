@@ -17,7 +17,6 @@
 package com.android.wallpaper.grass;
 
 import android.renderscript.Sampler;
-import static android.renderscript.ProgramFragment.EnvMode.*;
 import static android.renderscript.ProgramStore.DepthFunc.*;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
 import static android.renderscript.ProgramStore.BlendDstFunc;
@@ -402,26 +401,16 @@ class GrassRS extends RenderScriptScene {
         samplerBuilder.setMag(NEAREST);
         Sampler sn = samplerBuilder.create();
 
-        ProgramFragment.ShaderBuilder builder = new ProgramFragment.ShaderBuilder(mRS);
-        String t = new String("void main() {\n" +
-                              "  vec4 col = varColor;\n" +
-                              "  col.a = texture2D(uni_Tex0, varTex0.xy).a;\n" +
-                              "  gl_FragColor = col;\n" +
-                              "}\n");
-        builder.setTextureCount(1);
-        builder.setShader(t);
+        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
+                           ProgramFragment.Builder.Format.ALPHA, 0);
         mPfGrass = builder.create();
         mPfGrass.setName("PFGrass");
         mPfGrass.bindSampler(sl, 0);
 
-        builder = new ProgramFragment.ShaderBuilder(mRS);
-        t = new String("void main() {\n" +
-                       "  vec4 col = varColor;\n" +
-                       "  col.rgb = texture2D(uni_Tex0, varTex0.xy).rgb;\n" +
-                       "  gl_FragColor = col;\n" +
-                       "}\n");
-        builder.setTextureCount(1);
-        builder.setShader(t);
+        builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
+                           ProgramFragment.Builder.Format.RGB, 0);
         mPfBackground = builder.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(sn, 0);
@@ -442,7 +431,6 @@ class GrassRS extends RenderScriptScene {
         mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
 
         ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
-        pvb.setTextureMatrixEnable(true);
         mPvBackground = pvb.create();
         mPvBackground.bindAllocation(mPvOrthoAlloc);
         mPvBackground.setName("PVBackground");

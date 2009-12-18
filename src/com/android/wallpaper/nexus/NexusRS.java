@@ -18,8 +18,6 @@ package com.android.wallpaper.nexus;
 
 import static android.renderscript.Element.RGBA_8888;
 import static android.renderscript.Element.RGB_565;
-import static android.renderscript.ProgramFragment.EnvMode.MODULATE;
-import static android.renderscript.ProgramFragment.EnvMode.REPLACE;
 import static android.renderscript.ProgramStore.DepthFunc.ALWAYS;
 import static android.renderscript.Sampler.Value.LINEAR;
 import static android.renderscript.Sampler.Value.WRAP;
@@ -210,16 +208,16 @@ class NexusRS extends RenderScriptScene {
         sampleBuilder.setWrapT(WRAP);
         mSampler = sampleBuilder.create();
 
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS, null, null);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(MODULATE, 0);
+        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
+                           ProgramFragment.Builder.Format.RGBA, 0);
         mPfTexture = builder.create();
         mPfTexture.setName("PFTexture");
         mPfTexture.bindSampler(mSampler, 0);
 
-        builder = new ProgramFragment.Builder(mRS, null, null);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(REPLACE, 0);
+        builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
+                           ProgramFragment.Builder.Format.RGB, 0);
         mPfColor = builder.create();
         mPfColor.setName("PFColor");
         mPfColor.bindSampler(mSampler, 0);

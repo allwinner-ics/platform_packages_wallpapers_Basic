@@ -33,7 +33,6 @@ import static android.renderscript.Sampler.Value.WRAP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
 import static android.renderscript.ProgramStore.BlendDstFunc;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
-import static android.renderscript.ProgramFragment.EnvMode.*;
 import static android.renderscript.Element.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -234,9 +233,9 @@ class GalaxyRS extends RenderScriptScene {
         samplerBuilder.setWrapT(WRAP);
         mSampler = samplerBuilder.create();
 
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS, null, null);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(REPLACE, 0);
+        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
+                           ProgramFragment.Builder.Format.RGB, 0);
         mPfBackground = builder.create();
         mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
@@ -248,10 +247,10 @@ class GalaxyRS extends RenderScriptScene {
         samplerBuilder.setWrapT(WRAP);
         mStarSampler = samplerBuilder.create();
 
-        builder = new ProgramFragment.Builder(mRS, null, null);
+        builder = new ProgramFragment.Builder(mRS);
         builder.setPointSpriteTexCoordinateReplacement(true);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(MODULATE, 0);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
+                           ProgramFragment.Builder.Format.RGBA, 0);
         mPfStars = builder.create();
         mPfStars.setName("PFStars");
         mPfBackground.bindSampler(mStarSampler, 0);
