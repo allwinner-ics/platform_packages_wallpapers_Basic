@@ -62,17 +62,19 @@ void createParticle(struct Particles_s *part, int idx, float scale) {
     float z = randomGauss() * 0.4f * (1.0f - id);
     float p = -d * ELLIPSE_TWIST;
 
+    int r,g,b,a;
     if (d < State->galaxyRadius * 0.33f) {
-        part->r = (int) (220 + id * 35);
-        part->g = 220;
-        part->b = 220;
+        r = (int) (220 + id * 35);
+        g = 220;
+        b = 220;
     } else {
-        part->r= 180;
-        part->g = 180;
-        part->b = (int) clampf(140.f + id * 115.f, 140.f, 255.f);
+        r = 180;
+        g = 180;
+        b = (int) clampf(140.f + id * 115.f, 140.f, 255.f);
     }
     // Stash point size * 10 in Alpha
-    part->a = (int) (randf2(1.2f, 2.1f) * 60);
+    a = (int) (randf2(1.2f, 2.1f) * 60);
+    part->color = r | g<<8 | b<<16 | a<<24;
 
     if (d > State->galaxyRadius * 0.15f) {
         z *= 0.6f * (1.0f - id);
@@ -83,11 +85,11 @@ void createParticle(struct Particles_s *part, int idx, float scale) {
     // Map to the projection coordinates (viewport.x = -1.0 -> 1.0)
     d = mapf(-4.0f, State->galaxyRadius + 4.0f, 0.0f, scale, d);
 
-    part->x = randf(TWO_PI);
-    part->y = d;
+    part->position.x = randf(TWO_PI);
+    part->position.y = d;
     gSpeed[idx] = randf2(0.0015f, 0.0025f) * (0.5f + (scale / d)) * 0.8f;
 
-    part->z = z / 5.0f;
+    part->position.z = z / 5.0f;
 }
 
 /**
@@ -165,7 +167,7 @@ void drawParticles(float xOffset, float offset, int width, int height) {
 
     int i = 0;
     for ( ; i < particlesCount; i++) {
-        vtx->x = vtx->x + gSpeed[i];
+        vtx->position.x = vtx->position.x + gSpeed[i];
         vtx++;
     }
 

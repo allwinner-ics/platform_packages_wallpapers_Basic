@@ -174,13 +174,13 @@ void generateRipples() {
     v = vert;
     for (y = 0; y < height; y += 1) {
         for (x = 0; x < width; x += 1) {
-            struct vec3_s n1, n2, n3;
-            vec3Sub(&n1, (struct vec3_s *)&(v+1)->x, (struct vec3_s *)&v->x);
-            vec3Sub(&n2, (struct vec3_s *)&(v+width)->x, (struct vec3_s *)&v->x);
+            struct vecF32_3_s n1, n2, n3;
+            vec3Sub(&n1, (struct vecF32_3_s *)&(v+1)->x, (struct vecF32_3_s *)&v->x);
+            vec3Sub(&n2, (struct vecF32_3_s *)&(v+width)->x, (struct vecF32_3_s *)&v->x);
             vec3Cross(&n3, &n1, &n2);
 
             // Average of previous normal and N1 x N2
-            vec3Sub(&n1, (struct vec3_s *)&(v+width+1)->x, (struct vec3_s *)&v->x);
+            vec3Sub(&n1, (struct vecF32_3_s *)&(v+width+1)->x, (struct vecF32_3_s *)&v->x);
             vec3Cross(&n2, &n1, &n2);
             vec3Add(&n3, &n3, &n2);
             //vec3Norm(&n3);  // Not necessary for our constrained mesh.
