@@ -100,11 +100,11 @@ class GalaxyRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
+        createScriptStructures();
         createProgramVertex();
         createProgramRaster();
         createProgramFragmentStore();
         createProgramFragment();
-        createScriptStructures();
         loadTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
@@ -292,23 +292,25 @@ class GalaxyRS extends RenderScriptScene {
 
         ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
         String t = new String("void main() {\n" +
-                              "  float dist = attrib_Position.y;\n" +
-                              "  float x = attrib_Position.y * sin(attrib_Position.x);\n" +
-                              "  float y = attrib_Position.y * cos(attrib_Position.x) * 0.892;\n" +
-                              "  float p = attrib_Position.y * 5.5;\n" +
+                              "  float dist = ATTRIB_position.y;\n" +
+                              "  float angle = ATTRIB_position.x;\n" +
+                              "  float x = dist * sin(angle);\n" +
+                              "  float y = dist * cos(angle) * 0.892;\n" +
+                              "  float p = dist * 5.5;\n" +
                               "  float s = cos(p);\n" +
                               "  float t = sin(p);\n" +
                               "  vec4 pos;\n" +
                               "  pos.x = t * x + s * y;\n" +
                               "  pos.y = s * x - t * y;\n" +
-                              "  pos.z = attrib_Position.z;\n" +
+                              "  pos.z = ATTRIB_position.z;\n" +
                               "  pos.w = 1.0;\n" +
                               "  gl_Position = uni_MVP * pos;\n" +
-                              "  gl_PointSize = attrib_Color.a * 10.0;\n" +
-                              "  varColor.rgb = attrib_Color.rgb;\n" +
+                              "  gl_PointSize = ATTRIB_color.a * 10.0;\n" +
+                              "  varColor.rgb = ATTRIB_color.rgb;\n" +
                               "  varColor.a = 1.0;\n" +
                               "}\n");
         sb.setShader(t);
+        sb.addInput(mParticlesMesh.getVertexType(0).getElement());
         mPvStars = sb.create();
         mPvStars.bindAllocation(mPvProjectionAlloc);
         mPvStars.setName("PVStars");
