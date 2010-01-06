@@ -133,8 +133,8 @@ class GalaxyRS extends RenderScriptScene {
 
     private void createParticlesMesh() {
         final Builder elementBuilder = new Builder(mRS);
-        elementBuilder.add(Element.ATTRIB_COLOR_U8_4(mRS), "color");
-        elementBuilder.add(Element.ATTRIB_POSITION_3(mRS), "position");
+        elementBuilder.add(Element.createAttrib(mRS, Element.DataType.UNSIGNED_8, Element.DataKind.USER, 4), "color");
+        elementBuilder.add(Element.createAttrib(mRS, Element.DataType.FLOAT_32, Element.DataKind.USER, 3), "position");
         final Element vertexElement = elementBuilder.create();
 
         final SimpleMesh.Builder meshBuilder = new SimpleMesh.Builder(mRS);
