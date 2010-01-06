@@ -267,8 +267,8 @@ int main(int index) {
     gNow = uptimeMillis();
 
     if (Command->command != 0) {
-        debugF("x", Command->x);
-        debugF("y", Command->y);
+        //debugF("x", Command->x);
+        //debugF("y", Command->y);
         Command->command = 0;
         addTap(Command->x, Command->y);
     }
