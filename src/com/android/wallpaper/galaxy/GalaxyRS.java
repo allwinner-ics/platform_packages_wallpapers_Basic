@@ -304,7 +304,7 @@ class GalaxyRS extends RenderScriptScene {
                               "  pos.y = s * x - t * y;\n" +
                               "  pos.z = ATTRIB_position.z;\n" +
                               "  pos.w = 1.0;\n" +
-                              "  gl_Position = uni_MVP * pos;\n" +
+                              "  gl_Position = UNI_MVP * pos;\n" +
                               "  gl_PointSize = ATTRIB_color.a * 10.0;\n" +
                               "  varColor.rgb = ATTRIB_color.rgb;\n" +
                               "  varColor.a = 1.0;\n" +
