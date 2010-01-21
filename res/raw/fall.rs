@@ -29,7 +29,6 @@ int g_LastTime;
 struct vert_s {
     float x;
     float y;
-    float z;
     float s;
     float t;
 };
@@ -131,7 +130,6 @@ void drop(int x, int y, float s) {
 }
 
 void generateRipples() {
-    int rippleMapSize = State->rippleMapSize;
     int width = State->meshWidth;
     int height = State->meshHeight;
     int index = State->rippleIndex;
@@ -139,17 +137,18 @@ void generateRipples() {
     float xShift = State->xOffset * ratio * 2;
 
     float *vertices = loadSimpleMeshVerticesF(NAMED_WaterMesh, 0);
-    struct vert_s *vert = (struct vert_s *)vertices;
+    struct vert_s *v = (struct vert_s *)vertices;
 
     float fw = 1.0f / width;
     float fh = 1.0f / height;
     int x, y, ct;
-    struct vert_s *v = vert;
     for (y=0; y < height; y++) {
         for (x=0; x < width; x++) {
             struct drop_s * d = &gDrops[0];
             float z = 0;
 
+            v->s = (float)x * fw;
+            v->t = (float)y * fh;
             for (ct = 0; ct < gMaxDrops; ct++) {
                 if (d->ampE > 0.01f) {
                     float dx = (d->x - xShift) - x;
@@ -157,39 +156,19 @@ void generateRipples() {
                     float dist2 = dx*dx + dy*dy;
                     if (dist2 < d->spread2) {
                         float dist = sqrtf(dist2);
-                        float a = d->ampE * (dist * d->invSpread);
-                        z += sinf(d->spread - dist) * a;
+                        float a = d->ampE * (dist * d->invSpread2);
+                        a *= sinf(d->spread - dist) * 0.15f;
+                        v->s += dx * a;
+                        v->t += dy * a;
                     }
                 }
                 d++;
             }
-            v->z = z;
             v ++;
         }
     }
     for (ct = 0; ct < gMaxDrops; ct++) {
         updateDrop(ct);
-    }
-
-    v = vert;
-    for (y = 0; y < height; y += 1) {
-        for (x = 0; x < width; x += 1) {
-            struct vecF32_3_s n1, n2, n3;
-            vec3Sub(&n1, (struct vecF32_3_s *)&(v+1)->x, (struct vecF32_3_s *)&v->x);
-            vec3Sub(&n2, (struct vecF32_3_s *)&(v+width)->x, (struct vecF32_3_s *)&v->x);
-            vec3Cross(&n3, &n1, &n2);
-
-            // Average of previous normal and N1 x N2
-            vec3Sub(&n1, (struct vecF32_3_s *)&(v+width+1)->x, (struct vecF32_3_s *)&v->x);
-            vec3Cross(&n2, &n1, &n2);
-            vec3Add(&n3, &n3, &n2);
-            //vec3Norm(&n3);  // Not necessary for our constrained mesh.
-
-            v->s = (float)x * fw + n3.x;// * 0.2;
-            v->t = (float)y * fh + n3.y;// * 0.2;
-            v->z = 0;
-            v += 1;
-        }
     }
 }
 

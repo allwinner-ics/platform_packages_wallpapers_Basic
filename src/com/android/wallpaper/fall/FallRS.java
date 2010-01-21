@@ -54,9 +54,12 @@ class FallRS extends RenderScriptScene {
     private static final int RSID_TEXTURE_LEAVES = 1;
     private static final int RSID_TEXTURE_SKY = 2;
 
-    private static final int RSID_RIPPLE_MAP = 1;
     private static final int RSID_DROP = 2;
 
+
+    static class Defines {
+
+    };
 
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
@@ -85,8 +88,6 @@ class FallRS extends RenderScriptScene {
     @SuppressWarnings({"FieldCanBeLocal"})
     private SimpleMesh mMesh;
     private WorldState mWorldState;
-
-    private Allocation mRippleMap;
 
     private float mGlHeight;
 
@@ -142,7 +143,7 @@ class FallRS extends RenderScriptScene {
         createProgramFragmentStore();
         createProgramFragment();
         createMesh();
-        createScriptStructures();
+        createState();
         loadTextures();
 
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
@@ -157,7 +158,6 @@ class FallRS extends RenderScriptScene {
         script.setTimeZone(TimeZone.getDefault().getID());
 
         script.bindAllocation(mState, RSID_STATE);
-        script.bindAllocation(mRippleMap, RSID_RIPPLE_MAP);
         script.bindAllocation(mDropState, RSID_DROP);
 
         invokable.execute();
@@ -166,7 +166,7 @@ class FallRS extends RenderScriptScene {
     }
 
     private void createMesh() {
-        SimpleMesh.TriangleMeshBuilder tmb = new SimpleMesh.TriangleMeshBuilder(mRS, 3,
+        SimpleMesh.TriangleMeshBuilder tmb = new SimpleMesh.TriangleMeshBuilder(mRS, 2,
                 SimpleMesh.TriangleMeshBuilder.TEXTURE_0);
 
         final int width = mWidth > mHeight ? mHeight : mWidth;
@@ -189,7 +189,7 @@ class FallRS extends RenderScriptScene {
             final float t = 1.0f - y / (float) hResolution;
             for (int x = 0; x <= wResolution; x++) {
                 tmb.setTexture(x / (float) wResolution, t);
-                tmb.addVertex(-1.0f + x * quadWidth - quadWidth, yOffset, 0.0f);
+                tmb.addVertex(-1.0f + x * quadWidth - quadWidth, yOffset);
             }
         }
 
@@ -216,26 +216,12 @@ class FallRS extends RenderScriptScene {
         mMeshHeight = hResolution + 1;
     }
 
-    private void createScriptStructures() {
-        final int rippleMapSize = (mMeshWidth + 2) * (mMeshHeight + 2);
-
-        createState(rippleMapSize);
-        createRippleMap(rippleMapSize);
-    }
-
-    private void createRippleMap(int rippleMapSize) {
-        final int[] rippleMap = new int[rippleMapSize * 2];
-        mRippleMap = Allocation.createSized(mRS, USER_I32(mRS), rippleMap.length);
-        mRippleMap.data(rippleMap);
-    }
-
     static class WorldState {
         public int frameCount;
         public int width;
         public int height;
         public int meshWidth;
         public int meshHeight;
-        public int rippleMapSize;
         public int rippleIndex;
         public int leavesCount;
         public float glWidth;
@@ -252,13 +238,12 @@ class FallRS extends RenderScriptScene {
         public int dropY;
     }
 
-    private void createState(int rippleMapSize) {
+    private void createState() {
         mWorldState = new WorldState();
         mWorldState.width = mWidth;
         mWorldState.height = mHeight;
         mWorldState.meshWidth = mMeshWidth;
         mWorldState.meshHeight = mMeshHeight;
-        mWorldState.rippleMapSize = rippleMapSize;
         mWorldState.rippleIndex = 0;
         mWorldState.glWidth = 2.0f;
         mWorldState.glHeight = mGlHeight;
