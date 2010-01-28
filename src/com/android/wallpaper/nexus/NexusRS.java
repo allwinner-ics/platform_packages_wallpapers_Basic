@@ -20,11 +20,12 @@ import static android.renderscript.Element.RGBA_8888;
 import static android.renderscript.Element.RGB_565;
 import static android.renderscript.ProgramStore.DepthFunc.ALWAYS;
 import static android.renderscript.Sampler.Value.LINEAR;
-import static android.renderscript.Sampler.Value.WRAP;
+import static android.renderscript.Sampler.Value.CLAMP;
 
 import com.android.wallpaper.R;
 import com.android.wallpaper.RenderScriptScene;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
@@ -146,6 +147,7 @@ class NexusRS extends RenderScriptScene {
         public int rotate;
         public int isPreview;
         public float xOffset;
+        public int mode;
     }
 
     static class CommandState {
@@ -160,6 +162,12 @@ class NexusRS extends RenderScriptScene {
         mWorldState.height = mHeight;
         mWorldState.rotate = mWidth > mHeight ? 1 : 0;
         mWorldState.isPreview = isPreview() ? 1 : 0;
+
+        try {
+            mWorldState.mode = mResources.getInteger(R.integer.nexus_mode);
+        } catch (Resources.NotFoundException exc) {
+            mWorldState.mode = 0; // standard nexus mode
+        }
 
         mStateType = Type.createFromClass(mRS, WorldState.class, 1, "WorldState");
         mState = Allocation.createTyped(mRS, mStateType);
@@ -204,8 +212,8 @@ class NexusRS extends RenderScriptScene {
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
         sampleBuilder.setMin(LINEAR);
         sampleBuilder.setMag(LINEAR);
-        sampleBuilder.setWrapS(WRAP);
-        sampleBuilder.setWrapT(WRAP);
+        sampleBuilder.setWrapS(CLAMP);
+        sampleBuilder.setWrapT(CLAMP);
         mSampler = sampleBuilder.create();
 
         ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
