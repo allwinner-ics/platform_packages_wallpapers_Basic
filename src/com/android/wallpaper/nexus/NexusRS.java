@@ -21,6 +21,7 @@ import static android.renderscript.Element.RGB_565;
 import static android.renderscript.ProgramStore.DepthFunc.ALWAYS;
 import static android.renderscript.Sampler.Value.LINEAR;
 import static android.renderscript.Sampler.Value.CLAMP;
+import static android.renderscript.Sampler.Value.WRAP;
 
 import com.android.wallpaper.R;
 import com.android.wallpaper.RenderScriptScene;
@@ -55,6 +56,7 @@ class NexusRS extends RenderScriptScene {
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
     private ProgramFragment mPfTexture;
+    private ProgramFragment mPfTexture565;
 
     private ProgramFragment mPfColor;
 
@@ -66,7 +68,8 @@ class NexusRS extends RenderScriptScene {
 
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
-    private Sampler mSampler;
+    private Sampler mClampSampler;
+    private Sampler mWrapSampler;
 
     private Allocation mState;
 
@@ -209,26 +212,37 @@ class NexusRS extends RenderScriptScene {
     }
 
     private void createProgramFragment() {
+        // sampler and program fragment for pulses
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
         sampleBuilder.setMin(LINEAR);
         sampleBuilder.setMag(LINEAR);
-        sampleBuilder.setWrapS(CLAMP);
-        sampleBuilder.setWrapT(CLAMP);
-        mSampler = sampleBuilder.create();
-
+        sampleBuilder.setWrapS(WRAP);
+        sampleBuilder.setWrapT(WRAP);
+        mWrapSampler = sampleBuilder.create();
         ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
         builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
                            ProgramFragment.Builder.Format.RGBA, 0);
         mPfTexture = builder.create();
         mPfTexture.setName("PFTexture");
-        mPfTexture.bindSampler(mSampler, 0);
+        mPfTexture.bindSampler(mWrapSampler, 0);
 
         builder = new ProgramFragment.Builder(mRS);
         builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
                            ProgramFragment.Builder.Format.RGB, 0);
         mPfColor = builder.create();
         mPfColor.setName("PFColor");
-        mPfColor.bindSampler(mSampler, 0);
+        mPfColor.bindSampler(mWrapSampler, 0);
+
+        // sampler and program fragment for background image
+        sampleBuilder.setWrapS(CLAMP);
+        sampleBuilder.setWrapT(CLAMP);
+        mClampSampler = sampleBuilder.create();
+        builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
+                           ProgramFragment.Builder.Format.RGB, 0);
+        mPfTexture565 = builder.create();
+        mPfTexture565.setName("PFTexture565");
+        mPfTexture565.bindSampler(mClampSampler, 0);
     }
 
     private void createProgramFragmentStore() {
