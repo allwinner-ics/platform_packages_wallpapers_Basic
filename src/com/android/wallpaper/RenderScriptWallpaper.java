@@ -18,6 +18,7 @@ package com.android.wallpaper;
 
 import android.service.wallpaper.WallpaperService;
 import android.os.Bundle;
+import android.renderscript.RenderScriptGL;
 import android.renderscript.RenderScript;
 import android.view.SurfaceHolder;
 import android.view.Surface;
@@ -30,7 +31,7 @@ public abstract class RenderScriptWallpaper<T extends RenderScriptScene> extends
     protected abstract T createScene(int width, int height);
 
     private class RenderScriptEngine extends Engine {
-        private RenderScript mRs;
+        private RenderScriptGL mRs;
         private T mRenderer;
 
         @Override
@@ -98,7 +99,7 @@ public abstract class RenderScriptWallpaper<T extends RenderScriptScene> extends
             while (surface == null) {
                 surface = holder.getSurface();
             }
-            mRs = new RenderScript(false, false);
+            mRs = new RenderScriptGL(false, false);
             mRs.contextSetPriority(RenderScript.Priority.LOW);
         }
 

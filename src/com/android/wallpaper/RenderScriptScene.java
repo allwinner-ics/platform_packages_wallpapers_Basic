@@ -19,7 +19,7 @@ package com.android.wallpaper;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.renderscript.RenderScript;
+import android.renderscript.RenderScriptGL;
 import android.renderscript.ScriptC;
 
 public abstract class RenderScriptScene {
@@ -27,7 +27,7 @@ public abstract class RenderScriptScene {
     protected int mHeight;
     protected boolean mPreview;
     protected Resources mResources;
-    protected RenderScript mRS;
+    protected RenderScriptGL mRS;
     protected ScriptC mScript;
 
     public RenderScriptScene(int width, int height) {
@@ -35,13 +35,13 @@ public abstract class RenderScriptScene {
         mHeight = height;
     }
 
-    public void init(RenderScript rs, Resources res, boolean isPreview) {
+    public void init(RenderScriptGL rs, Resources res, boolean isPreview) {
         mRS = rs;
         mResources = res;
         mPreview = isPreview;
         mScript = createScript();
     }
-    
+
     public boolean isPreview() {
         return mPreview;
     }
@@ -58,7 +58,7 @@ public abstract class RenderScriptScene {
         return mResources;
     }
 
-    public RenderScript getRS() {
+    public RenderScriptGL getRS() {
         return mRS;
     }
 
@@ -67,7 +67,7 @@ public abstract class RenderScriptScene {
     }
 
     protected abstract ScriptC createScript();
-    
+
     public void stop() {
         mRS.contextBindRootScript(null);
     }
@@ -84,7 +84,7 @@ public abstract class RenderScriptScene {
     @SuppressWarnings({"UnusedDeclaration"})
     public void setOffset(float xOffset, float yOffset, int xPixels, int yPixels) {
     }
-    
+
     @SuppressWarnings({"UnusedDeclaration"})
     public Bundle onCommand(String action, int x, int y, int z, Bundle extras,
             boolean resultRequested) {

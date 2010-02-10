@@ -21,6 +21,7 @@ import android.content.Context;
 import android.view.SurfaceHolder;
 import android.view.MotionEvent;
 import android.renderscript.RenderScript;
+import android.renderscript.RenderScriptGL;
 import android.renderscript.RSSurfaceView;
 
 class FallView extends RSSurfaceView {
@@ -35,7 +36,7 @@ class FallView extends RSSurfaceView {
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
 
-        RenderScript RS = createRenderScript(false);
+        RenderScriptGL RS = createRenderScript(false);
         mRender = new FallRS(w, h);
         mRender.init(RS, getResources(), false);
         mRender.start();
