@@ -47,8 +47,7 @@ class GalaxyRS extends RenderScriptScene {
     private static final int PARTICLES_COUNT = 12000;
 
     private static final int RSID_STATE = 0;
-    private static final int RSID_PARTICLES = 1;
-    private static final int RSID_PARTICLES_BUFFER = 2;
+    private static final int RSID_PARTICLES_BUFFER = 1;
 
     private static final int TEXTURES_COUNT = 3;
     private static final int RSID_TEXTURE_SPACE = 0;
@@ -85,7 +84,6 @@ class GalaxyRS extends RenderScriptScene {
     private GalaxyState mGalaxyState;
     private Type mStateType;
     private Allocation mState;
-    private Type mParticlesType;
     private Allocation mParticlesBuffer;
     @SuppressWarnings({"FieldCanBeLocal"})
     private SimpleMesh mParticlesMesh;
@@ -110,7 +108,6 @@ class GalaxyRS extends RenderScriptScene {
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setType(mStateType, "State", RSID_STATE);
         sb.setType(mParticlesMesh.getVertexType(0), "Particles", RSID_PARTICLES_BUFFER);
-        sb.setType(mParticlesType, "Stars", RSID_PARTICLES);
         mInitParticles = sb.addInvokable("initParticles");
         sb.setScript(mResources, R.raw.galaxy);
         sb.setRoot(true);
@@ -133,8 +130,10 @@ class GalaxyRS extends RenderScriptScene {
 
     private void createParticlesMesh() {
         final Builder elementBuilder = new Builder(mRS);
-        elementBuilder.add(Element.createAttrib(mRS, Element.DataType.UNSIGNED_8, Element.DataKind.USER, 4), "color");
-        elementBuilder.add(Element.createAttrib(mRS, Element.DataType.FLOAT_32, Element.DataKind.USER, 3), "position");
+        elementBuilder.add(Element.createAttrib(mRS, Element.DataType.UNSIGNED_8,
+                Element.DataKind.USER, 4), "color");
+        elementBuilder.add(Element.createAttrib(mRS, Element.DataType.FLOAT_32,
+                Element.DataKind.USER, 3), "position");
         final Element vertexElement = elementBuilder.create();
 
         final SimpleMesh.Builder meshBuilder = new SimpleMesh.Builder(mRS);
@@ -164,6 +163,8 @@ class GalaxyRS extends RenderScriptScene {
         mState.data(mGalaxyState);
 
         mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
+        mPvProjectionAlloc.setupProjectionNormalized(mWidth, mHeight);
+
         mInitParticles.execute();
     }
 
@@ -291,24 +292,24 @@ class GalaxyRS extends RenderScriptScene {
         mPvBkProj.setName("PVBkProj");
 
         ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
-        String t = new String("void main() {\n" +
-                              "  float dist = ATTRIB_position.y;\n" +
-                              "  float angle = ATTRIB_position.x;\n" +
-                              "  float x = dist * sin(angle);\n" +
-                              "  float y = dist * cos(angle) * 0.892;\n" +
-                              "  float p = dist * 5.5;\n" +
-                              "  float s = cos(p);\n" +
-                              "  float t = sin(p);\n" +
-                              "  vec4 pos;\n" +
-                              "  pos.x = t * x + s * y;\n" +
-                              "  pos.y = s * x - t * y;\n" +
-                              "  pos.z = ATTRIB_position.z;\n" +
-                              "  pos.w = 1.0;\n" +
-                              "  gl_Position = UNI_MVP * pos;\n" +
-                              "  gl_PointSize = ATTRIB_color.a * 10.0;\n" +
-                              "  varColor.rgb = ATTRIB_color.rgb;\n" +
-                              "  varColor.a = 1.0;\n" +
-                              "}\n");
+        String t = "void main() {\n" +
+                    "  float dist = ATTRIB_position.y;\n" +
+                    "  float angle = ATTRIB_position.x;\n" +
+                    "  float x = dist * sin(angle);\n" +
+                    "  float y = dist * cos(angle) * 0.892;\n" +
+                    "  float p = dist * 5.5;\n" +
+                    "  float s = cos(p);\n" +
+                    "  float t = sin(p);\n" +
+                    "  vec4 pos;\n" +
+                    "  pos.x = t * x + s * y;\n" +
+                    "  pos.y = s * x - t * y;\n" +
+                    "  pos.z = ATTRIB_position.z;\n" +
+                    "  pos.w = 1.0;\n" +
+                    "  gl_Position = UNI_MVP * pos;\n" +
+                    "  gl_PointSize = ATTRIB_color.a * 10.0;\n" +
+                    "  varColor.rgb = ATTRIB_color.rgb;\n" +
+                    "  varColor.a = 1.0;\n" +
+                    "}\n";
         sb.setShader(t);
         sb.addInput(mParticlesMesh.getVertexType(0).getElement());
         mPvStars = sb.create();
