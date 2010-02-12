@@ -116,9 +116,14 @@ int drawBlade(struct Blades_s *bladeStruct, float *bladeBuffer, int *bladeColor,
     bladeColor[0] = color;                          // V1.ABGR
     bladeBuffer[1] = bottomLeft;                    // V1.X
     bladeBuffer[2] = bottom;                        // V1.Y
+    bladeBuffer[3] = 0.f;                           // V1.s
+    bladeBuffer[4] = 0.f;                           // V1.t
+                                                    //
     bladeColor[5] = color;                          // V2.ABGR
     bladeBuffer[6] = bottomRight;                   // V2.X
     bladeBuffer[7] = bottom;                        // V2.Y
+    bladeBuffer[8] = 1.f;                           // V2.s
+    bladeBuffer[9] = 0.f;                           // V2.t
     bladeBuffer += 10;
     bladeColor += 10;
 
@@ -133,12 +138,16 @@ int drawBlade(struct Blades_s *bladeStruct, float *bladeBuffer, int *bladeColor,
         float topRight = topX + spi;
 
         bladeColor[0] = color;                          // V1.ABGR
-        bladeBuffer[1] = topLeft;                       // V2.X
-        bladeBuffer[2] = topY;                          // V2.Y
+        bladeBuffer[1] = topLeft;                       // V1.X
+        bladeBuffer[2] = topY;                          // V1.Y
+        bladeBuffer[3] = 0.f;                           // V1.s
+        bladeBuffer[4] = 0.f;                           // V1.t
 
-        bladeColor[5] = color;                         // V3.ABGR
-        bladeBuffer[6] = topRight;                     // V3.X
-        bladeBuffer[7] = topY;                         // V3.Y
+        bladeColor[5] = color;                          // V2.ABGR
+        bladeBuffer[6] = topRight;                      // V2.X
+        bladeBuffer[7] = topY;                          // V2.Y
+        bladeBuffer[8] = 1.f;                           // V2.s
+        bladeBuffer[9] = 0.f;                           // V2.t
 
         bladeBuffer += 10;
         bladeColor += 10;
