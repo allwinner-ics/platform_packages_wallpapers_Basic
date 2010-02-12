@@ -18,15 +18,15 @@ package com.android.wallpaper.nexus;
 
 import static android.renderscript.Element.RGBA_8888;
 import static android.renderscript.Element.RGB_565;
-import static android.renderscript.ProgramFragment.EnvMode.MODULATE;
-import static android.renderscript.ProgramFragment.EnvMode.REPLACE;
 import static android.renderscript.ProgramStore.DepthFunc.ALWAYS;
 import static android.renderscript.Sampler.Value.LINEAR;
+import static android.renderscript.Sampler.Value.CLAMP;
 import static android.renderscript.Sampler.Value.WRAP;
 
 import com.android.wallpaper.R;
 import com.android.wallpaper.RenderScriptScene;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
@@ -56,6 +56,7 @@ class NexusRS extends RenderScriptScene {
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
     private ProgramFragment mPfTexture;
+    private ProgramFragment mPfTexture565;
 
     private ProgramFragment mPfColor;
 
@@ -67,7 +68,8 @@ class NexusRS extends RenderScriptScene {
 
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
-    private Sampler mSampler;
+    private Sampler mClampSampler;
+    private Sampler mWrapSampler;
 
     private Allocation mState;
 
@@ -148,6 +150,7 @@ class NexusRS extends RenderScriptScene {
         public int rotate;
         public int isPreview;
         public float xOffset;
+        public int mode;
     }
 
     static class CommandState {
@@ -162,6 +165,12 @@ class NexusRS extends RenderScriptScene {
         mWorldState.height = mHeight;
         mWorldState.rotate = mWidth > mHeight ? 1 : 0;
         mWorldState.isPreview = isPreview() ? 1 : 0;
+
+        try {
+            mWorldState.mode = mResources.getInteger(R.integer.nexus_mode);
+        } catch (Resources.NotFoundException exc) {
+            mWorldState.mode = 0; // standard nexus mode
+        }
 
         mStateType = Type.createFromClass(mRS, WorldState.class, 1, "WorldState");
         mState = Allocation.createTyped(mRS, mStateType);
@@ -203,26 +212,37 @@ class NexusRS extends RenderScriptScene {
     }
 
     private void createProgramFragment() {
+        // sampler and program fragment for pulses
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
         sampleBuilder.setMin(LINEAR);
         sampleBuilder.setMag(LINEAR);
         sampleBuilder.setWrapS(WRAP);
         sampleBuilder.setWrapT(WRAP);
-        mSampler = sampleBuilder.create();
-
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS, null, null);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(MODULATE, 0);
+        mWrapSampler = sampleBuilder.create();
+        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
+                           ProgramFragment.Builder.Format.RGBA, 0);
         mPfTexture = builder.create();
         mPfTexture.setName("PFTexture");
-        mPfTexture.bindSampler(mSampler, 0);
+        mPfTexture.bindSampler(mWrapSampler, 0);
 
-        builder = new ProgramFragment.Builder(mRS, null, null);
-        builder.setTexEnable(true, 0);
-        builder.setTexEnvMode(REPLACE, 0);
+        builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
+                           ProgramFragment.Builder.Format.RGB, 0);
         mPfColor = builder.create();
         mPfColor.setName("PFColor");
-        mPfColor.bindSampler(mSampler, 0);
+        mPfColor.bindSampler(mWrapSampler, 0);
+
+        // sampler and program fragment for background image
+        sampleBuilder.setWrapS(CLAMP);
+        sampleBuilder.setWrapT(CLAMP);
+        mClampSampler = sampleBuilder.create();
+        builder = new ProgramFragment.Builder(mRS);
+        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
+                           ProgramFragment.Builder.Format.RGB, 0);
+        mPfTexture565 = builder.create();
+        mPfTexture565.setName("PFTexture565");
+        mPfTexture565.bindSampler(mClampSampler, 0);
     }
 
     private void createProgramFragmentStore() {
