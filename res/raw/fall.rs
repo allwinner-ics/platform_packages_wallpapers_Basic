@@ -161,15 +161,14 @@ int drawLeaf(struct Leaves_s *leaf) {
 
         color(0.0f, 0.0f, 0.0f, alpha * 0.15f);
 
+        matrixLoadIdentity(matrix);
+        matrixTranslate(matrix, x - State->xOffset * 2, y, tz);
         if (State->rotate) {
-            matrixLoadRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
-        } else {
-            matrixLoadIdentity(matrix);
+            matrixRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
         }
 
         float shadowOffet = a / 5;
 
-        matrixTranslate(matrix, (x - State->xOffset * 2) + (shadowOffet / 2), y - shadowOffet, tz);
         matrixScale(matrix, s, s, 1.0f);
         matrixRotate(matrix, r, 0.0f, 0.0f, 1.0f);
         vpLoadModelMatrix(matrix);
@@ -184,12 +183,11 @@ int drawLeaf(struct Leaves_s *leaf) {
         color(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    if (State->rotate) {
-        matrixLoadRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
-    } else {
-        matrixLoadIdentity(matrix);
-    }
+    matrixLoadIdentity(matrix);
     matrixTranslate(matrix, x - State->xOffset * 2, y, tz);
+    if (State->rotate) {
+        matrixRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
+    }
     matrixScale(matrix, s, s, 1.0f);
     matrixRotate(matrix, r, 0.0f, 0.0f, 1.0f);
     vpLoadModelMatrix(matrix);
