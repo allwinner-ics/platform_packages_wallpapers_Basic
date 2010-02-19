@@ -321,12 +321,6 @@ int main(int index) {
         genLeafDrop(gLeaves[i], randf(0.3f) + 0.1f);
     }
 
-    if (State->rotate) {
-        float matrix[16];
-        matrixLoadRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
-        vpLoadModelMatrix(matrix);
-    }
-
     bindProgramVertex(NAMED_PVWater);
     generateRipples();
     drawRiverbed();
