@@ -284,6 +284,7 @@ int main(int index) {
     if (State->rotate) {
         //matrixLoadRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
         //matrixTranslate(matrix, 0.0f, -height, 1.0f);
+        // XXX: HAX: do not slide display in landscape
     } else {
          matrixTranslate(matrix, -(State->xOffset * width), 0, 0);
     }
