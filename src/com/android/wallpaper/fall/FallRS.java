@@ -150,8 +150,6 @@ class FallRS extends RenderScriptScene {
         createProgramFragment();
         loadTextures();
 
-
-
         ScriptC.Builder sb = new ScriptC.Builder(mRS);
         sb.setType(mStateType, "State", RSID_STATE);
         sb.setType(mDropType, "Drop", RSID_DROP);
@@ -274,7 +272,6 @@ class FallRS extends RenderScriptScene {
         final Allocation[] textures = new Allocation[TEXTURES_COUNT];
         textures[RSID_TEXTURE_RIVERBED] = loadTexture(R.drawable.pond, "TRiverbed");
         textures[RSID_TEXTURE_LEAVES] = loadTextureARGB(R.drawable.leaves, "TLeaves");
-        // textures[RSID_TEXTURE_SKY] = loadTextureARGB(R.drawable.clouds, "TSky");
 
         final int count = textures.length;
         for (int i = 0; i < count; i++) {
@@ -346,9 +343,6 @@ class FallRS extends RenderScriptScene {
         mPvSky.bindAllocation(mPvOrthoAlloc);
         mPvSky.setName("PVSky");
 
-        float dw = 480.f / mMeshWidth;
-        float dh = 800.f / mMeshHeight;
-
         Element.Builder eb = new Element.Builder(mRS);
         // Make this an array when we can.
         eb.add(Element.createVector(mRS, Element.DataType.FLOAT_32, 4), "Drop01");
@@ -368,6 +362,12 @@ class FallRS extends RenderScriptScene {
 
 
         ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
+        
+        // The shader to use in landscape is:
+        // "  varTex0.x = (pos.x + 1.0) * 0.5;\n" +
+        // //"  varTex0.x += UNI_Offset.x * 0.5;\n" +
+        // "  varTex0.y = (pos.y + 1.666) * 0.3125;\n" +        
+        
         String t = new String("void main() {\n" +
                               "  vec4 pos;\n" +
                               "  pos.x = ATTRIB_position.x;\n" +
@@ -378,7 +378,7 @@ class FallRS extends RenderScriptScene {
 
                               // When we resize the texture we will need to tweak this.
                               "  varTex0.x = (pos.x + 1.0) * 0.25;\n" +
-                              "  varTex0.x += UNI_Offset.x * 0.5 * 0.85;\n" +
+                              "  varTex0.x += UNI_Offset.x * 0.5;\n" +
                               "  varTex0.y = (pos.y + 1.6666) * 0.33;\n" +
                               "  varTex0.w = 0.0;\n" +
                               "  varColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
@@ -482,8 +482,6 @@ class FallRS extends RenderScriptScene {
                               "    amp *= sin(UNI_Drop10.w - dist);\n" +
                               "    varTex0.xy += delta * amp;\n" +
                               "  }\n" +
-
-
                               "}\n");
         sb.setShader(t);
         sb.addConstant(mUniformAlloc.getType());
@@ -496,13 +494,8 @@ class FallRS extends RenderScriptScene {
     }
 
     void addDrop(float x, float y) {
-        if (mWorldState.rotate == 0) {
-            mDrop.dropX = (int) ((x / mWidth) * mMeshWidth);
-            mDrop.dropY = (int) ((y / mHeight) * mMeshHeight);
-        } else {
-            mDrop.dropY = (int) ((x / mWidth) * mMeshHeight);
-            mDrop.dropX = mMeshWidth - (int) ((y / mHeight) * mMeshWidth);
-        }
+        mDrop.dropX = (int) ((x / mWidth) * mMeshWidth);
+        mDrop.dropY = (int) ((y / mHeight) * mMeshHeight);
         mDropState.data(mDrop);
     }
 }
