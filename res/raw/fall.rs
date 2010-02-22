@@ -133,7 +133,6 @@ void genLeafDrop(struct Leaves_s *leaf, float amp) {
     float nx = (leaf->x + State->glWidth * 0.5f) / State->glWidth;
     float ny = (leaf->y + State->glHeight * 0.5f) / State->glHeight;
     drop(nx * State->meshWidth, State->meshHeight - ny * State->meshHeight, amp);
-
 }
 
 int drawLeaf(struct Leaves_s *leaf) {
@@ -162,8 +161,10 @@ int drawLeaf(struct Leaves_s *leaf) {
         color(0.0f, 0.0f, 0.0f, alpha * 0.15f);
 
         matrixLoadIdentity(matrix);
-        matrixTranslate(matrix, x - State->xOffset * 2, y, tz);
-        if (State->rotate) {
+        if (!State->rotate) {
+            matrixTranslate(matrix, x - State->xOffset * 2, y, tz);
+        } else {
+            matrixTranslate(matrix, x, y, tz);
             matrixRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
         }
 
@@ -184,8 +185,10 @@ int drawLeaf(struct Leaves_s *leaf) {
     }
 
     matrixLoadIdentity(matrix);
-    matrixTranslate(matrix, x - State->xOffset * 2, y, tz);
-    if (State->rotate) {
+    if (!State->rotate) {
+        matrixTranslate(matrix, x - State->xOffset * 2, y, tz);
+    } else {
+        matrixTranslate(matrix, x, y, tz);
         matrixRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
     }
     matrixScale(matrix, s, s, 1.0f);
@@ -301,6 +304,7 @@ int main(int index) {
     g_LastTime = newTime;
     g_DT = minf(g_DT, 0.2f);
 
+    Constants->Rotate = (float) State->rotate;
 
     if (Drop->dropX != -1) {
         drop(Drop->dropX, Drop->dropY, 2);
