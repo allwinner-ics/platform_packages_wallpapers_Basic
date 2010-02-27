@@ -15,7 +15,7 @@
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="wallpapers" msgid="7890805662847963863">"Androids rörliga bakgrunder"</string>
+    <string name="wallpapers" msgid="7890805662847963863">"Androids levande bakgrundsbilder"</string>
     <string name="wallpaper_walkaround" msgid="5548084303782181478">"Genomskinlig"</string>
     <string name="wallpaper_walkaround_author" msgid="7292960549371044078">"Google"</string>
     <string name="wallpaper_walkaround_desc" msgid="1714824320382778730">"Se igenom telefonen och gå omkring utan att riskera en olycka."</string>
