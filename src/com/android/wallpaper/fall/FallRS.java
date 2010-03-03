@@ -350,158 +350,52 @@ class FallRS extends RenderScriptScene {
         mUniformAlloc = Allocation.createSized(mRS, e, 1);
 
         ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
-        
-        String t = "void main() {\n" +
-                "  vec4 pos;\n" +
-                "  pos.x = ATTRIB_position.x;\n" +
-                "  pos.y = ATTRIB_position.y;\n" +
-                "  pos.z = 0.0;\n" +
-                "  pos.w = 1.0;\n" +
-                "  gl_Position = pos;\n" +
 
-                "  if (UNI_Rotate < 0.9) {\n" + 
-                "    varTex0.x = (pos.x + 1.0) * 0.25;\n" +
-                "    varTex0.x += UNI_Offset.x * 0.5;\n" +
-                "    varTex0.y = (pos.y + 1.6666) * 0.33;\n" +
-                "  } else {\n" +
-                "    varTex0.x = (pos.x + 1.0) * 0.5;\n" +
-                "    varTex0.y = (pos.y + 1.666) * 0.3125;\n" +
+        String t = "\n" +
+                "vec2 addDrop(vec4 d, vec2 pos, float dxMul) {\n" +
+                "  vec2 ret = vec2(0.0, 0.0);\n" +
+                "  vec2 delta = d.xy - pos;\n" +
+                "  delta.x *= dxMul;\n" +
+                "  float dist = length(delta);\n" +
+                "  if (dist < d.w) { \n" +
+                "    float amp = d.z * dist;\n" +
+                "    amp /= d.w * d.w;\n" +
+                "    amp *= sin(d.w - dist);\n" +
+                "    ret = delta * amp;\n" +
                 "  }\n" +
+                "  return ret;\n" +
+                "}\n" +
 
-                "  varTex0.w = 0.0;\n" +
-                "  varColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
-                
+                "void main() {\n" +
+                "  vec2 pos = ATTRIB_position.xy;\n" +
+                "  gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);\n" +
+                "  float dxMul = 1.0;\n" +
+
+                "  varTex0 = vec4((pos.x + 1.0), (pos.y + 1.6666), 0.0, 0.0);\n" +
+
                 "  if (UNI_Rotate < 0.9) {\n" +
+                "    varTex0.xy *= vec2(0.25, 0.33);\n" +
+                "    varTex0.x += UNI_Offset.x * 0.5;\n" +
                 "    pos.x += UNI_Offset.x * 2.0;\n" +
+                "  } else {\n" +
+                "    varTex0.xy *= vec2(0.5, 0.3125);\n" +
+                "    dxMul = 2.5;\n" +
                 "  }\n" +
-                "  pos.x += 1.0;\n" +
-                "  pos.x *= 25.0;\n" +
-                "  pos.y += 1.0;\n" +
-                "  pos.y *= 42.0;\n" +
 
-                "  vec2 delta;\n" +
-                "  float dist;\n" +
-                "  float amp;\n" +
-                
-                "  delta = UNI_Drop01.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop01.w) { \n" +
-                "    amp = UNI_Drop01.z * dist;\n" +
-                "    amp /= UNI_Drop01.w * UNI_Drop01.w;\n" +
-                "    amp *= sin(UNI_Drop01.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop02.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop02.w) { \n" +
-                "    amp = UNI_Drop02.z * dist;\n" +
-                "    amp /= UNI_Drop02.w * UNI_Drop02.w;\n" +
-                "    amp *= sin(UNI_Drop02.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop03.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop03.w) { \n" +
-                "    amp = UNI_Drop03.z * dist;\n" +
-                "    amp /= UNI_Drop03.w * UNI_Drop03.w;\n" +
-                "    amp *= sin(UNI_Drop03.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop04.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop04.w) { \n" +
-                "    amp = UNI_Drop04.z * dist;\n" +
-                "    amp /= UNI_Drop04.w * UNI_Drop04.w;\n" +
-                "    amp *= sin(UNI_Drop04.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop05.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop05.w) { \n" +
-                "    amp = UNI_Drop05.z * dist;\n" +
-                "    amp /= UNI_Drop05.w * UNI_Drop05.w;\n" +
-                "    amp *= sin(UNI_Drop05.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop06.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop06.w) { \n" +
-                "    amp = UNI_Drop06.z * dist;\n" +
-                "    amp /= UNI_Drop06.w * UNI_Drop06.w;\n" +
-                "    amp *= sin(UNI_Drop06.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop07.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop07.w) { \n" +
-                "    amp = UNI_Drop07.z * dist;\n" +
-                "    amp /= UNI_Drop07.w * UNI_Drop07.w;\n" +
-                "    amp *= sin(UNI_Drop07.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop08.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop08.w) { \n" +
-                "    amp = UNI_Drop08.z * dist;\n" +
-                "    amp /= UNI_Drop08.w * UNI_Drop08.w;\n" +
-                "    amp *= sin(UNI_Drop08.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop09.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop09.w) { \n" +
-                "    amp = UNI_Drop09.z * dist;\n" +
-                "    amp /= UNI_Drop09.w * UNI_Drop09.w;\n" +
-                "    amp *= sin(UNI_Drop09.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
-                
-                "  delta = UNI_Drop10.xy - pos.xy;\n" +
-                "  if (UNI_Rotate > 0.9) {\n" +
-                "    delta.x *= 2.5;\n" +
-                "  }\n" +
-                "  dist = length(delta);\n" +
-                "  if (dist < UNI_Drop10.w) { \n" +
-                "    amp = UNI_Drop10.z * dist;\n" +
-                "    amp /= UNI_Drop10.w * UNI_Drop10.w;\n" +
-                "    amp *= sin(UNI_Drop10.w - dist);\n" +
-                "    varTex0.xy += delta * amp;\n" +
-                "  }\n" +
+                "  varColor = vec4(1.0, 1.0, 1.0, 1.0);\n" +
+                "  pos.xy += vec2(1.0, 1.0);\n" +
+                "  pos.xy *= vec2(25.0, 42.0);\n" +
+
+                "  varTex0.xy += addDrop(UNI_Drop01, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop02, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop03, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop04, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop05, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop06, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop07, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop08, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop09, pos, dxMul);\n" +
+                "  varTex0.xy += addDrop(UNI_Drop10, pos, dxMul);\n" +
                 "}\n";
         sb.setShader(t);
         sb.addConstant(mUniformAlloc.getType());
