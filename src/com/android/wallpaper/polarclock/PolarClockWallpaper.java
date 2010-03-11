@@ -450,6 +450,8 @@ public class PolarClockWallpaper extends WallpaperService {
         @Override
         public void onOffsetsChanged(float xOffset, float yOffset,
                 float xStep, float yStep, int xPixels, int yPixels) {
+            if (isPreview()) return;
+
             mOffsetX = xOffset;
             drawFrame();
         }
