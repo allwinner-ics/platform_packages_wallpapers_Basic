@@ -38,7 +38,7 @@
     <string name="wallpaper_nexus" msgid="3789061608411260304">"Conexión"</string>
     <string name="wallpaper_nexus_author" msgid="8492858637541249441">"Google"</string>
     <string name="wallpaper_nexus_desc" msgid="5562598238151885905">"Un vistazo a la red neuronal"</string>
-    <string name="clock_settings" msgid="7837858747417927288">"Configuración del reloj polar"</string>
+    <string name="clock_settings" msgid="7837858747417927288">"Ajustes del reloj polar"</string>
     <string name="show_seconds" msgid="8525899907567218168">"Mostrar segundos"</string>
     <string name="variable_line_width" msgid="8487094734462263605">"Variar el ancho de los anillos"</string>
     <string name="palette" msgid="1636154448241520718">"Paleta de color"</string>

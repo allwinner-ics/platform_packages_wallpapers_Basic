@@ -34,8 +34,8 @@
     <string name="wallpaper_fall_desc" msgid="595888373487204297">"Jesienne liście spadające&lt;br&gt; do źródełka falującego poniżej:&lt;br&gt; z filozofią zen w tle"</string>
     <string name="wallpaper_clock" msgid="6555051461698958610">"Zegar biegunowy"</string>
     <string name="wallpaper_clock_author" msgid="8779094427834551330">"Google"</string>
-    <string name="wallpaper_clock_desc" msgid="6767980298898740026">"Przedstawianie daty i godziny w postaci koncentrycznych łuków: miesiąca, dnia, godziny, minut i sekund"</string>
-    <string name="wallpaper_nexus" msgid="3789061608411260304">"Węzeł"</string>
+    <string name="wallpaper_clock_desc" msgid="6767980298898740026">"Data i godzina w postaci koncentrycznych łuków: miesiąca, dnia, godziny, minut i sekund"</string>
+    <string name="wallpaper_nexus" msgid="3789061608411260304">"Nexus"</string>
     <string name="wallpaper_nexus_author" msgid="8492858637541249441">"Google"</string>
     <string name="wallpaper_nexus_desc" msgid="5562598238151885905">"Rzut oka do wnętrza sieci neuronowej"</string>
     <string name="clock_settings" msgid="7837858747417927288">"Ustawienia zegara biegunowego"</string>
