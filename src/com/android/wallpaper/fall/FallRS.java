@@ -136,6 +136,7 @@ class FallRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
+        /*
         createMesh();
         createState();
         createProgramVertex();
@@ -160,8 +161,8 @@ class FallRS extends RenderScriptScene {
         script.bindAllocation(mDropState, RSID_DROP);
 
         invokable.execute();
-
-        return script;
+*/
+        return null;//script;
     }
 
     private void createMesh() {

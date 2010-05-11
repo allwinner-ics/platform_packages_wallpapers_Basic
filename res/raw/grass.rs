@@ -13,35 +13,114 @@
 // limitations under the License.
 
 #pragma version(1)
-#pragma stateVertex(PVBackground)
-#pragma stateFragment(PFBackground)
-#pragma stateStore(PFSBackground)
+//#pragma stateVertex(default)
+//#pragma stateFragment(default)
+//#pragma stateStore(default)
+
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_types.rsh"
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
+
 
 #define RSID_BLADES_BUFFER 2
 
 #define TESSELATION 0.5f
 #define HALF_TESSELATION 0.25f
-
 #define MAX_BEND 0.09f
-
 #define SECONDS_IN_DAY 86400.0f
-
 #define PI 3.1415926f
 #define HALF_PI 1.570796326f
-
 #define REAL_TIME 1
+
+int gBladesCount;
+int gIndexCount;
+int gWidth;
+int gHeight;
+float gXOffset;
+float gDawn;
+float gMorning;
+float gAfternoon;
+float gDusk;
+int gIsPreview;
+rs_program_vertex gPVBackground;
+rs_program_fragment gPFBackground;
+rs_program_fragment gPFGrass;
+rs_program_store gPSBackground;
+rs_allocation gTNight;
+rs_allocation gTSunset;
+rs_allocation gTSunrise;
+rs_allocation gTSky;
+rs_allocation gTAa;
+rs_allocation gBladesBuffer;
+rs_mesh gBladesMesh;
+
+
+typedef struct Blade_s {
+    float angle;
+    int size;
+    float xPos;
+    float yPos;
+    float offset;
+    float scale;
+    float lengthX;
+    float lengthY;
+    float hardness;
+    float h;
+    float s;
+    float b;
+    float turbulencex;
+} Blade_t;
+Blade_t *Blades;
+
+typedef struct Vertex_s {
+    uint32_t color;
+    float x;
+    float y;
+    float s;
+    float t;
+} Vertex_t;
+Vertex_t *Verticies;
+
+
+#pragma rs export_var(gBladesCount, gIndexCount, gWidth, gHeight, gXOffset, gDawn, gMorning, gAfternoon, gDusk, gIsPreview, gPVBackground, gPFBackground, gPFGrass, gPSBackground, gTNight, gTSunset, gTSunrise, gTSky, gTAa, gBladesBuffer, gBladesMesh, Blades, Verticies)
+
+
+
+void debugAll()
+{
+    debugP(0, (void *)gBladesCount);
+    debugP(1, (void *)gIndexCount);
+    debugP(2, (void *)gWidth);
+    debugP(3, (void *)gHeight);
+    debugPf(4, gXOffset);
+    debugPf(5, gDawn);
+    debugPf(6, gMorning);
+    debugPf(7, gAfternoon);
+    debugPf(8, gDusk);
+    debugP(9, (void *)gIsPreview);
+    debugP(10, (void *)gPVBackground);
+    debugP(11, (void *)gPFBackground);
+    debugP(12, (void *)gPFGrass);
+    debugP(13, (void *)gPSBackground);
+    debugP(14, (void *)gTNight);
+    debugP(15, (void *)gTSunset);
+    debugP(16, (void *)gTSunrise);
+    debugP(17, (void *)gTSky);
+    debugP(18, (void *)gTAa);
+    debugP(19, (void *)gBladesBuffer);
+    debugP(20, (void *)gBladesMesh);
+    debugP(21, (void *)Blades);
+    debugP(22, (void *)Verticies);
+}
 
 void updateBlades()
 {
-    int bladesCount = State->bladesCount;
-    struct Blades_s *bladeStruct = Blades;
-
-    int i;
-    for (i = 0; i < bladesCount; i ++) {
-        float xpos = randf2(-State->width, State->width);
+    Blade_t *bladeStruct = Blades;
+    for (int i = 0; i < gBladesCount; i ++) {
+        float xpos = randf2(-gWidth, gWidth);
         bladeStruct->xPos = xpos;
         bladeStruct->turbulencex = xpos * 0.006f;
-        bladeStruct->yPos = State->height;
+        bladeStruct->yPos = gHeight;
         bladeStruct++;
     }
 }
@@ -59,7 +138,7 @@ void alpha(float a) {
 }
 
 void drawNight(int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, NAMED_TNight);
+    bindTexture(gPFBackground, 0, gTNight);
     drawQuadTexCoords(
             0.0f, -32.0f, 0.0f,
             0.0f, 1.0f,
@@ -72,33 +151,32 @@ void drawNight(int width, int height) {
 }
 
 void drawSunrise(int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, NAMED_TSunrise);
+    bindTexture(gPFBackground, 0, gTSunrise);
     drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
 void drawNoon(int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, NAMED_TSky);
+    bindTexture(gPFBackground, 0, gTSky);
     drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
 void drawSunset(int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, NAMED_TSunset);
+    bindTexture(gPFBackground, 0, gTSunset);
     drawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
-int drawBlade(struct Blades_s *bladeStruct, float *bladeBuffer, int *bladeColor,
+int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
         float brightness, float xOffset, float now) {
 
     float scale = bladeStruct->scale;
     float angle = bladeStruct->angle;
     float xpos = bladeStruct->xPos + xOffset;
     int size = bladeStruct->size;
-
     int color = hsbToAbgr(bladeStruct->h, bladeStruct->s,
-                          lerpf(0, bladeStruct->b, brightness), 1.0f);
+                          mix(0.f, bladeStruct->b, brightness), 1.0f);
 
     float newAngle = (turbulencef2(bladeStruct->turbulencex, now, 4.0f) - 0.5f) * 0.5f;
-    angle = clampf(angle + (newAngle + bladeStruct->offset - angle) * 0.15f, -MAX_BEND, MAX_BEND);
+    angle = clamp(angle + (newAngle + bladeStruct->offset - angle) * 0.15f, -MAX_BEND, MAX_BEND);
 
     float currentAngle = HALF_PI;
 
@@ -113,23 +191,23 @@ int drawBlade(struct Blades_s *bladeStruct, float *bladeBuffer, int *bladeColor,
     float bottomRight = bottomX + si;
     float bottom = bottomY + HALF_TESSELATION;
 
-    bladeColor[0] = color;                          // V1.ABGR
-    bladeBuffer[1] = bottomLeft;                    // V1.X
-    bladeBuffer[2] = bottom;                        // V1.Y
-    bladeBuffer[3] = 0.f;                           // V1.s
-    bladeBuffer[4] = 0.f;                           // V1.t
+    v[0].color = color;                          // V1.ABGR
+    v[0].x = bottomLeft;                    // V1.X
+    v[0].y = bottom;                        // V1.Y
+    v[0].s = 0.f;                           // V1.s
+    v[0].t = 0.f;                           // V1.t
                                                     //
-    bladeColor[5] = color;                          // V2.ABGR
-    bladeBuffer[6] = bottomRight;                   // V2.X
-    bladeBuffer[7] = bottom;                        // V2.Y
-    bladeBuffer[8] = 1.f;                           // V2.s
-    bladeBuffer[9] = 0.f;                           // V2.t
-    bladeBuffer += 10;
-    bladeColor += 10;
+    v[1].color = color;                          // V2.ABGR
+    v[1].x = bottomRight;                   // V2.X
+    v[1].y = bottom;                        // V2.Y
+    v[1].s = 1.f;                           // V2.s
+    v[1].t = 0.f;                           // V2.t
+    v += 2;
 
+    //debugPi(200, size);
     for ( ; size > 0; size -= 1) {
-        float topX = bottomX - cosf_fast(currentAngle) * bladeStruct->lengthX;
-        float topY = bottomY - sinf_fast(currentAngle) * bladeStruct->lengthY;
+        float topX = bottomX - cos(currentAngle) * bladeStruct->lengthX;
+        float topY = bottomY - sin(currentAngle) * bladeStruct->lengthY;
 
         si = (float)size * scale;
         float spi = si - scale;
@@ -137,109 +215,97 @@ int drawBlade(struct Blades_s *bladeStruct, float *bladeBuffer, int *bladeColor,
         float topLeft = topX - spi;
         float topRight = topX + spi;
 
-        bladeColor[0] = color;                          // V1.ABGR
-        bladeBuffer[1] = topLeft;                       // V1.X
-        bladeBuffer[2] = topY;                          // V1.Y
-        bladeBuffer[3] = 0.f;                           // V1.s
-        bladeBuffer[4] = 0.f;                           // V1.t
+        v[0].color = color;                          // V1.ABGR
+        v[0].x = topLeft;                       // V1.X
+        v[0].y = topY;                          // V1.Y
+        v[0].s = 0.f;                           // V1.s
+        v[0].t = 0.f;                           // V1.t
 
-        bladeColor[5] = color;                          // V2.ABGR
-        bladeBuffer[6] = topRight;                      // V2.X
-        bladeBuffer[7] = topY;                          // V2.Y
-        bladeBuffer[8] = 1.f;                           // V2.s
-        bladeBuffer[9] = 0.f;                           // V2.t
+        v[1].color = color;                          // V2.ABGR
+        v[1].x = topRight;                      // V2.X
+        v[1].y = topY;                          // V2.Y
+        v[1].s = 1.f;                           // V2.s
+        v[1].t = 0.f;                           // V2.t
 
-        bladeBuffer += 10;
-        bladeColor += 10;
-
+        v += 2;
         bottomX = topX;
         bottomY = topY;
-
         currentAngle += d;
     }
 
     bladeStruct->angle = angle;
 
     // 2 vertices per triangle, 5 properties per vertex (RGBA, X, Y, S, T)
-    return bladeStruct->size * 10 + 10;
+    return bladeStruct->size * 2 + 2;
 }
 
 void drawBlades(float brightness, float xOffset) {
     // For anti-aliasing
-    bindTexture(NAMED_PFGrass, 0, NAMED_TAa);
+    bindTexture(gPFGrass, 0, gTAa);
 
-    int bladesCount = State->bladesCount;
-
-    int i = 0;
-    struct Blades_s *bladeStruct = Blades;
-    float *bladeBuffer = loadArrayF(RSID_BLADES_BUFFER, 0);
-    int *bladeColor = loadArrayI32(RSID_BLADES_BUFFER, 0);
-
+    Blade_t *bladeStruct = Blades;
+    Vertex_t *vtx = Verticies;
     float now = uptimeMillis() * 0.00004f;
 
-    for ( ; i < bladesCount; i += 1) {
-        int offset = drawBlade(bladeStruct, bladeBuffer, bladeColor, brightness, xOffset, now);
-        bladeBuffer += offset;
-        bladeColor += offset;
+    for (int i = 0; i < gBladesCount; i += 1) {
+        int offset = drawBlade(bladeStruct, vtx, brightness, xOffset, now);
+        vtx += offset;
         bladeStruct ++;
     }
 
-    uploadToBufferObject(NAMED_BladesBuffer);
-    drawSimpleMeshRange(NAMED_BladesMesh, 0, State->indexCount);
+    uploadToBufferObject(gBladesBuffer);
+    drawSimpleMeshRange(gBladesMesh, 0, gIndexCount);
 }
 
-int main(int launchID) {
-    int width = State->width;
-    int height = State->height;
+int root(int launchID) {
+    //debugAll();
+    float x = mix((float)gWidth, 0.f, gXOffset);
 
-    float x = lerpf(width, 0, State->xOffset);
-
-    float now = time(State->isPreview);
+    float now = time(gIsPreview);
     alpha(1.0f);
 
-    float newB = 1.0f;
-    float dawn = State->dawn;
-    float morning = State->morning;
-    float afternoon = State->afternoon;
-    float dusk = State->dusk;
+    bindProgramVertex(gPVBackground);
+    bindProgramFragment(gPFBackground);
+    bindProgramStore(gPSBackground);
 
-    if (now >= 0.0f && now < dawn) {                    // Draw night
-        drawNight(width, height);
+    float newB = 1.0f;
+    if (now >= 0.0f && now < gDawn) {                    // Draw night
+        drawNight(gWidth, gHeight);
         newB = 0.0f;
-    } else if (now >= dawn && now <= morning) {         // Draw sunrise
-        float half = dawn + (morning - dawn) * 0.5f;
+    } else if (now >= gDawn && now <= gMorning) {         // Draw sunrise
+        float half = gDawn + (gMorning - gDawn) * 0.5f;
         if (now <= half) {                              // Draw night->sunrise
-            drawNight(width, height);
-            newB = normf(dawn, half, now);
+            drawNight(gWidth, gHeight);
+            newB = normf(gDawn, half, now);
             alpha(newB);
-            drawSunrise(width, height);
+            drawSunrise(gWidth, gHeight);
         } else {                                        // Draw sunrise->day
-            drawSunrise(width, height);
-            alpha(normf(half, morning, now));
-            drawNoon(width, height);
+            drawSunrise(gWidth, gHeight);
+            alpha(normf(half, gMorning, now));
+            drawNoon(gWidth, gHeight);
         }
-    } else if (now > morning && now < afternoon) {      // Draw day
-        drawNoon(width, height);
-    } else if (now >= afternoon && now <= dusk) {       // Draw sunset
-        float half = afternoon + (dusk - afternoon) * 0.5f;
+    } else if (now > gMorning && now < gAfternoon) {      // Draw day
+        drawNoon(gWidth, gHeight);
+    } else if (now >= gAfternoon && now <= gDusk) {       // Draw sunset
+        float half = gAfternoon + (gDusk - gAfternoon) * 0.5f;
         if (now <= half) {                              // Draw day->sunset
-            drawNoon(width, height);
-            newB = normf(afternoon, half, now);
+            drawNoon(gWidth, gHeight);
+            newB = normf(gAfternoon, half, now);
             alpha(newB);
             newB = 1.0f - newB;
-            drawSunset(width, height);
+            drawSunset(gWidth, gHeight);
         } else {                                        // Draw sunset->night
-            drawSunset(width, height);
-            alpha(normf(half, dusk, now));
-            drawNight(width, height);
+            drawSunset(gWidth, gHeight);
+            alpha(normf(half, gDusk, now));
+            drawNight(gWidth, gHeight);
             newB = 0.0f;
         }
-    } else if (now > dusk) {                            // Draw night
-        drawNight(width, height);
+    } else if (now > gDusk) {                            // Draw night
+        drawNight(gWidth, gHeight);
         newB = 0.0f;
     }
 
-    bindProgramFragment(NAMED_PFGrass);
+    bindProgramFragment(gPFGrass);
     drawBlades(newB, x);
 
     return 50;

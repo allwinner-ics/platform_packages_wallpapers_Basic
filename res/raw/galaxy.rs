@@ -13,10 +13,15 @@
 // limitations under the License.
 
 #pragma version(1)
-#pragma stateVertex(PVBkOrtho)
-#pragma stateRaster(parent)
-#pragma stateFragment(PFBackground)
-#pragma stateStore(PFSBackground)
+
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_types.rsh"
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
+
+//#pragma stateVertex(PVBkOrtho)
+//#pragma stateRaster(parent)
+//#pragma stateFragment(PFBackground)
+//#pragma stateStore(PFSBackground)
 
 #define ELLIPSE_RATIO 0.892f
 
@@ -24,7 +29,43 @@
 #define TWO_PI 6.283f
 #define ELLIPSE_TWIST 0.023333333f
 
-float angle;
+static float angle;
+static int gOldWidth;
+static int gOldHeight;
+static int gWidth;
+static int gHeight;
+
+int gParticlesCount;
+int gGalaxyRadius;
+float gXOffset;
+int gIsPreview;
+int gScale;
+
+rs_program_fragment gPFBackground;
+rs_program_fragment gPFStars;
+rs_program_vertex gPVStars;
+rs_program_vertex gPVBkProj;
+rs_program_store gPSLights;
+
+rs_allocation gTSpace;
+rs_allocation gTFlares;
+rs_allocation gTLight1;
+rs_allocation gParticlesBuffer;
+rs_mesh gParticlesMesh;
+
+
+struct f3 {
+    float x;
+    float y;
+    float z;
+};
+
+typedef struct Particle_s {
+    uint32_t color;
+    struct f3 position;
+} Particle_t;
+Particle_t *Particles;
+
 
 /**
  * Script initialization. Called automatically.
@@ -56,14 +97,14 @@ float gSpeed[12000];
 /**
  * Generates the properties for a given star.
  */
-void createParticle(struct Particles_s *part, int idx, float scale) {
-    float d = fabsf(randomGauss()) * State->galaxyRadius * 0.5f + randf(64.0f);
-    float id = d / State->galaxyRadius;
+void createParticle(Particle_t *part, int idx, float scale) {
+    float d = fabsf(randomGauss()) * gGalaxyRadius * 0.5f + randf(64.0f);
+    float id = d / gGalaxyRadius;
     float z = randomGauss() * 0.4f * (1.0f - id);
     float p = -d * ELLIPSE_TWIST;
 
     int r,g,b,a;
-    if (d < State->galaxyRadius * 0.33f) {
+    if (d < gGalaxyRadius * 0.33f) {
         r = (int) (220 + id * 35);
         g = 220;
         b = 220;
@@ -76,14 +117,14 @@ void createParticle(struct Particles_s *part, int idx, float scale) {
     a = (int) (randf2(1.2f, 2.1f) * 60);
     part->color = r | g<<8 | b<<16 | a<<24;
 
-    if (d > State->galaxyRadius * 0.15f) {
+    if (d > gGalaxyRadius * 0.15f) {
         z *= 0.6f * (1.0f - id);
     } else {
         z *= 0.72f;
     }
 
     // Map to the projection coordinates (viewport.x = -1.0 -> 1.0)
-    d = mapf(-4.0f, State->galaxyRadius + 4.0f, 0.0f, scale, d);
+    d = mapf(-4.0f, gGalaxyRadius + 4.0f, 0.0f, scale, d);
 
     part->position.x = randf(TWO_PI);
     part->position.y = d;
@@ -96,37 +137,34 @@ void createParticle(struct Particles_s *part, int idx, float scale) {
  * Initialize all the stars. Called from Java.
  */
 void initParticles() {
-    if (State->isPreview == 1) {
+    if (gIsPreview == 1) {
         angle = 0.0f;
     }
 
-    struct Particles_s *part = Particles;
-    int particlesCount = State->particlesCount;
-    float scale = State->galaxyRadius / (State->width * 0.5f);
-
-    int i;
-    for (i = 0; i < particlesCount; i ++) {
+    Particle_t *part = Particles;
+    float scale = gGalaxyRadius / (gWidth * 0.5f);
+    for (int i = 0; i < gParticlesCount; i ++) {
         createParticle(part, i, scale);
         part++;
     }
 }
 
-void drawSpace(float xOffset, int width, int height) {
-    bindTexture(NAMED_PFBackground, 0, NAMED_TSpace);
+void drawSpace() {
+    bindTexture(gPFBackground, 0, gTSpace);
     drawQuadTexCoords(
             0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            width, 0.0f, 0.0f, 2.0f, 1.0f,
-            width, height, 0.0f, 2.0f, 0.0f,
-            0.0f, height, 0.0f, 0.0f, 0.0f);
+            gWidth, 0.0f, 0.0f, 2.0f, 1.0f,
+            gWidth, gHeight, 0.0f, 2.0f, 0.0f,
+            0.0f, gHeight, 0.0f, 0.0f, 0.0f);
 }
 
-void drawLights(float xOffset, int width, int height) {
-    bindProgramVertex(NAMED_PVBkProj);
-    bindProgramFragment(NAMED_PFBackground);
-    bindTexture(NAMED_PFBackground, 0, NAMED_TLight1);
+void drawLights() {
+    bindProgramVertex(gPVBkProj);
+    bindProgramFragment(gPFBackground);
+    bindTexture(gPFBackground, 0, gTLight1);
 
-    float scale = 512.0f / width;
-    float x = -scale + xOffset - scale * 0.05f;
+    float scale = 512.0f / gWidth;
+    float x = -scale + gXOffset - scale * 0.05f;
     float y = -scale;
 
     scale *= 2.0f;
@@ -137,18 +175,18 @@ void drawLights(float xOffset, int width, int height) {
              x, y + scale, 0.0f);
 }
 
-void drawParticles(float xOffset, float offset, int width, int height) {
-    bindProgramVertex(NAMED_PVStars);
-    bindProgramFragment(NAMED_PFStars);
-    bindProgramFragmentStore(NAMED_PFSLights);
-    bindTexture(NAMED_PFStars, 0, NAMED_TFlares);
+void drawParticles(float offset) {
+    bindProgramVertex(gPVStars);
+    bindProgramFragment(gPFStars);
+    bindProgramFragmentStore(gPSLights);
+    bindTexture(gPFStars, 0, gTFlares);
 
     float a = offset * angle;
     float absoluteAngle = fabsf(a);
 
     float matrix[16];
     matrixLoadTranslate(matrix, 0.0f, 0.0f, 10.0f - 6.0f * absoluteAngle / 50.0f);
-    if (State->scale == 0) {
+    if (gScale == 0) {
         matrixScale(matrix, 6.6f, 6.0f, 1.0f);
     } else {
         matrixScale(matrix, 12.6f, 12.0f, 1.0f);
@@ -160,32 +198,29 @@ void drawParticles(float xOffset, float offset, int width, int height) {
     // quadratic attenuation
     //pointAttenuation(0.1f + 0.3f * fabsf(offset), 0.0f, 0.06f  + 0.1f *  fabsf(offset));
 
-    int radius = State->galaxyRadius;
-    int particlesCount = State->particlesCount;
-
-    struct Particles_s *vtx = Particles;
-
-    int i = 0;
-    for ( ; i < particlesCount; i++) {
+    Particle_t *vtx = Particles;
+    for (int i = 0; i < gParticlesCount; i++) {
         vtx->position.x = vtx->position.x + gSpeed[i];
         vtx++;
     }
 
-    uploadToBufferObject(NAMED_ParticlesBuffer);
-    drawSimpleMeshRange(NAMED_ParticlesMesh, 0, particlesCount);
+    uploadToBufferObject(gParticlesBuffer);
+    drawSimpleMeshRange(gParticlesMesh, 0, gParticlesCount);
 }
 
-int main(int index) {
-    int width = State->width;
-    int height = State->height;
+int root() {
+    gWidth = getWidth();
+    gHeight = getHeight();
+    if ((gWidth != gOldWidth) || (gHeight != gOldHeight)) {
+        initParticles();
+        gOldWidth = gWidth;
+        gOldHeight = gHeight;
+    }
 
-    float x = 0.0f;
-    float offset = lerpf(-1.0f, 1.0f, State->xOffset);
-
-    drawSpace(x, width, height);
-
-    drawParticles(x, offset, width, height);
-    drawLights(x, width, height);
+    float offset = lerpf(-1.0f, 1.0f, gXOffset);
+    drawSpace();
+    drawParticles(offset);
+    drawLights();
 
     return 45;
 }

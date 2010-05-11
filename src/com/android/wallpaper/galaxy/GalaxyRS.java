@@ -98,6 +98,7 @@ class GalaxyRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
+        /*
         createScriptStructures();
         createProgramVertex();
         createProgramRaster();
@@ -121,6 +122,8 @@ class GalaxyRS extends RenderScriptScene {
         mInitParticles.execute();
 
         return script;
+        */
+        return null;
     }
 
     private void createScriptStructures() {

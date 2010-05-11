@@ -13,8 +13,12 @@
 // limitations under the License.
 
 #pragma version(1)
-#pragma stateVertex(PVOrtho)
-#pragma stateStore(PSSolid)
+
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_types.rsh"
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
+#include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
+//#pragma stateVertex(PVOrtho)
+//#pragma stateStore(PSSolid)
 
 #define MAX_PULSES           20
 #define MAX_EXTRAS           40
@@ -29,7 +33,7 @@
 #define TRAIL_SIZE           40 // Number of cells in a trail
 #define MAX_DELAY	         2000 // Delay between a pulse going offscreen and restarting
 
-struct pulse_s {
+typedef struct pulse_s {
     int pulseType;
     float originX;
     float originY;
@@ -38,16 +42,35 @@ struct pulse_s {
     float dx;
     float dy;
     int active;
-};
-struct pulse_s gPulses[MAX_PULSES];
+} pulse_t;
 
-struct pulse_s gExtras[MAX_EXTRAS];
+static pulse_t gPulses[MAX_PULSES];
+static pulse_t gExtras[MAX_EXTRAS];
+static int gNow;
+static int gWidth;
+static int gHeight;
+static int gRotate;
 
-int gNow;
+
+int gIsPreview;
+float gXOffset;
+int gMode;
+
+rs_program_fragment gPFTexture;
+rs_program_store gPSBlend;
+rs_program_fragment gPFTexture565;
+rs_program_vertex gPVOrtho;
+
+rs_allocation gTBackground;
+rs_allocation gTPulse;
+rs_allocation gTGlow;
+
+#pragma rs export_var(gIsPreview, gXOffset, gMode, gPFTexture, gPSBlend, gPFTexture565, gPVOrtho, gTBackground, gTPulse, gTGlow)
 
 
 void setColor(int c) {
-    if (State->mode == 1) {
+    //debugPi(99, 6);
+    if (gMode == 1) {
         // sholes red
         color(0.9f, 0.1f, 0.1f, 0.8f);
     } else if (c == 0) {
@@ -66,28 +89,29 @@ void setColor(int c) {
 }
 
 void initPulse(struct pulse_s * pulse, int pulseType) {
-    if (randf(1) > 0.5f) {
-        pulse->originX = (int)randf(State->width * 2 / PULSE_SIZE) * PULSE_SIZE;
+    //debugPi(99, 5);
+    if (randf(1.f) > 0.5f) {
+        pulse->originX = (int)randf(getWidth() * 2 / PULSE_SIZE) * PULSE_SIZE;
         pulse->dx = 0;
-        if (randf(1) > 0.5f) {
+        if (randf(1.f) > 0.5f) {
             // Top
             pulse->originY = 0;
             pulse->dy = randf2(1.0f - SPEED_VARIANCE, 1.0 + SPEED_VARIANCE);
         } else {
             // Bottom
-            pulse->originY = State->height;
+            pulse->originY = gHeight;
             pulse->dy = -randf2(1.0f - SPEED_VARIANCE, 1.0 + SPEED_VARIANCE);
         }
     } else {
-        pulse->originY = (int)randf(State->height / PULSE_SIZE) * PULSE_SIZE;
+        pulse->originY = (int)randf(getHeight() / PULSE_SIZE) * PULSE_SIZE;
         pulse->dy = 0;
-        if (randf(1) > 0.5f) {
+        if (randf(1.f) > 0.5f) {
             // Left
             pulse->originX = 0;
             pulse->dx = randf2(1.0f - SPEED_VARIANCE, 1.0 + SPEED_VARIANCE);
         } else {
             // Right
-            pulse->originX = State->width * 2;
+            pulse->originX = getWidth() * 2;
             pulse->dx = -randf2(1.0f - SPEED_VARIANCE, 1.0 + SPEED_VARIANCE);
         }
     }
@@ -104,6 +128,7 @@ void initPulse(struct pulse_s * pulse, int pulseType) {
 }
 
 void initPulses() {
+    //debugPi(99, 4);
     gNow = uptimeMillis();
     int i;
     for (i=0; i<MAX_PULSES; i++) {
@@ -116,21 +141,22 @@ void initPulses() {
     }
 }
 
-void drawBackground(int width, int height) {
-	bindProgramFragment(NAMED_PFTexture565);
-    bindTexture(NAMED_PFTexture565, 0, NAMED_TBackground);
+void drawBackground() {
+    //debugPi(99, 3);
+    bindProgramFragment(gPFTexture565);
+    bindTexture(gPFTexture565, 0, gTBackground);
     color(1.0f, 1.0f, 1.0f, 1.0f);
-    if (State->rotate) {
-        drawRect(0.0f, 0.0f, height*2, width, 0.0f);
+    if (gRotate) {
+        drawRect(0.0f, 0.0f, gHeight*2, gWidth, 0.0f);
     } else {
-    	drawRect(0.0f, 0.0f, width*2, height, 0.0f);
-   	}
+        drawRect(0.0f, 0.0f, gWidth*2, gHeight, 0.0f);
+    }
 }
 
-
-void drawPulses(struct pulse_s * pulseSet, int setSize) {
-	bindProgramFragment(NAMED_PFTexture);
-    bindProgramFragmentStore(NAMED_PSBlend);
+void drawPulses(pulse_t * pulseSet, int setSize) {
+    //debugPi(99, 2);
+	 bindProgramFragment(gPFTexture);
+    bindProgramFragmentStore(gPSBlend);
 
     float matrix[16];
 
@@ -153,9 +179,9 @@ void drawPulses(struct pulse_s * pulseSet, int setSize) {
 	                initPulse(p, p->pulseType);
 	            } else {
 	                setColor(p->color);
-	                bindTexture(NAMED_PFTexture, 0, NAMED_TPulse);
+	                bindTexture(gPFTexture, 0, gTPulse);
 	                drawRect(x, y, xx, y + PULSE_SIZE, 0.0f);
-	                bindTexture(NAMED_PFTexture, 0, NAMED_TGlow);
+	                bindTexture(gPFTexture, 0, gTGlow);
 	                drawRect(x + HALF_PULSE_SIZE - HALF_GLOW_SIZE,
 	                    y + HALF_PULSE_SIZE - HALF_GLOW_SIZE,
 	                    x + HALF_PULSE_SIZE + HALF_GLOW_SIZE,
@@ -167,13 +193,13 @@ void drawPulses(struct pulse_s * pulseSet, int setSize) {
 	            matrixRotate(matrix, 180.0f, 0.0f, 0.0f, 1.0f);
 	            vpLoadTextureMatrix(matrix);
 	            float xx = x - (TRAIL_SIZE * PULSE_SIZE);
-	 	        if (xx >= State->width * 2) {
+	 	        if (xx >= gWidth * 2) {
 	               initPulse(p, p->pulseType);
 	            } else {
 	                setColor(p->color);
-	                bindTexture(NAMED_PFTexture, 0, NAMED_TPulse);
+	                bindTexture(gPFTexture, 0, gTPulse);
 	                drawRect(xx, y, x, y + PULSE_SIZE, 0.0f);
-	                bindTexture(NAMED_PFTexture, 0, NAMED_TGlow);
+	                bindTexture(gPFTexture, 0, gTGlow);
 	                drawRect(x - HALF_PULSE_SIZE - HALF_GLOW_SIZE,
 	                    y + HALF_PULSE_SIZE - HALF_GLOW_SIZE,
 	                    x - HALF_PULSE_SIZE + HALF_GLOW_SIZE,
@@ -188,9 +214,9 @@ void drawPulses(struct pulse_s * pulseSet, int setSize) {
 	               initPulse(p, p->pulseType);
 	            } else {
 	                setColor(p->color);
-	                bindTexture(NAMED_PFTexture, 0, NAMED_TPulse);
+	                bindTexture(gPFTexture, 0, gTPulse);
 	                drawRect(x, y, x + PULSE_SIZE, yy, 0.0f);
-	                bindTexture(NAMED_PFTexture, 0, NAMED_TGlow);
+	                bindTexture(gPFTexture, 0, gTGlow);
 	                drawRect(x + HALF_PULSE_SIZE - HALF_GLOW_SIZE,
 	                    y + HALF_PULSE_SIZE - HALF_GLOW_SIZE,
 	                    x + HALF_PULSE_SIZE + HALF_GLOW_SIZE,
@@ -202,13 +228,13 @@ void drawPulses(struct pulse_s * pulseSet, int setSize) {
 	            matrixRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
 	            vpLoadTextureMatrix(matrix);
 	            float yy = y - (TRAIL_SIZE * PULSE_SIZE);
-	            if (yy >= State->height) {
+	            if (yy >= gHeight) {
 	               initPulse(p, p->pulseType);
 	            } else {
 	                setColor(p->color);
-	                bindTexture(NAMED_PFTexture, 0, NAMED_TPulse);
+	                bindTexture(gPFTexture, 0, gTPulse);
 	                drawRect(x, yy, x + PULSE_SIZE, y, 0.0f);
-	                bindTexture(NAMED_PFTexture, 0, NAMED_TGlow);
+	                bindTexture(gPFTexture, 0, gTGlow);
 	                drawRect(x + HALF_PULSE_SIZE - HALF_GLOW_SIZE,
 	                    y - HALF_PULSE_SIZE - HALF_GLOW_SIZE,
 	                    x + HALF_PULSE_SIZE + HALF_GLOW_SIZE,
@@ -219,12 +245,12 @@ void drawPulses(struct pulse_s * pulseSet, int setSize) {
 	    }
     }
 
-
     matrixLoadIdentity(matrix);
     vpLoadTextureMatrix(matrix);
 }
 
 void addTap(int x, int y) {
+    //debugPi(99, 1);
     int i;
     int count = 0;
     int color = (int)randf(4.0f);
@@ -265,34 +291,29 @@ void addTap(int x, int y) {
     }
 }
 
-int main(int index) {
+int root() {
+    //debugPi(99, 0);
+    gWidth = getWidth();
+    gHeight = getHeight();
+    gRotate = gWidth > gHeight ? 1 : 0;
 
     gNow = uptimeMillis();
 
-    if (Command->command != 0) {
-        //debugF("x", Command->x);
-        //debugF("y", Command->y);
-        Command->command = 0;
-        addTap(Command->x, Command->y);
-    }
-
-    int width = State->width;
-    int height = State->height;
+    bindProgramVertex(gPVOrtho);
 
     float matrix[16];
     matrixLoadIdentity(matrix);
-    if (State->rotate) {
+    if (gRotate) {
         //matrixLoadRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
         //matrixTranslate(matrix, 0.0f, -height, 1.0f);
         // XXX: HAX: do not slide display in landscape
     } else {
-         matrixTranslate(matrix, -(State->xOffset * width), 0, 0);
+         matrixTranslate(matrix, -(gXOffset * gWidth), 0, 0);
     }
 
     vpLoadModelMatrix(matrix);
 
-    drawBackground(width, height);
-
+    drawBackground();
     drawPulses(gPulses, MAX_PULSES);
     drawPulses(gExtras, MAX_EXTRAS);
 
