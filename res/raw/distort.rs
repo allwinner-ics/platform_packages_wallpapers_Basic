@@ -405,7 +405,7 @@ void drawLeaf(struct Leaves_s *leaf, int meshWidth, int meshHeight, float glWidt
 
 void drawLeaves() {
     bindProgramFragment(NAMED_PFSky);
-    bindProgramFragmentStore(NAMED_PFSLeaf);
+    bindProgramStore(NAMED_PFSLeaf);
     bindProgramVertex(NAMED_PVSky);
     bindTexture(NAMED_PFSky, 0, NAMED_TLeaves);
 
@@ -441,7 +441,7 @@ void drawSky() {
     color(1.0f, 1.0f, 1.0f, 0.4f);
 
     bindProgramFragment(NAMED_PFSky);
-    bindProgramFragmentStore(NAMED_PFSLeaf);
+    bindProgramStore(NAMED_PFSLeaf);
     bindTexture(NAMED_PFSky, 0, NAMED_TSky);
 
     float x = skyOffsetX + State->skySpeedX;
@@ -470,7 +470,7 @@ void drawLighting() {
     specular(0.44f, 0.44f, 0.44f, 1.0f);
     shininess(40.0f);
 
-    bindProgramFragmentStore(NAMED_PFSBackground);
+    bindProgramStore(NAMED_PFSBackground);
     bindProgramFragment(NAMED_PFLighting);
     bindProgramVertex(NAMED_PVLight);
 

@@ -169,7 +169,7 @@ static void drawLights() {
 static void drawParticles(float offset) {
     bindProgramVertex(gPVStars);
     bindProgramFragment(gPFStars);
-    bindProgramFragmentStore(gPSLights);
+    bindProgramStore(gPSLights);
     bindTexture(gPFStars, 0, gTFlares);
 
     float a = offset * angle;

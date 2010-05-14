@@ -156,7 +156,7 @@ void drawBackground() {
 void drawPulses(pulse_t * pulseSet, int setSize) {
     //debugPi(99, 2);
 	 bindProgramFragment(gPFTexture);
-    bindProgramFragmentStore(gPSBlend);
+    bindProgramStore(gPSBlend);
 
     float matrix[16];
 

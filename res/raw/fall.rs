@@ -321,7 +321,7 @@ int drawLeaf(struct Leaves_s *leaf) {
 
 void drawLeaves() {
     bindProgramFragment(g_PFSky);
-    bindProgramFragmentStore(g_PFSLeaf);
+    bindProgramStore(g_PFSLeaf);
     bindProgramVertex(g_PVSky);
     bindTexture(g_PFSky, 0, g_TLeaves);
 
@@ -369,7 +369,7 @@ void drawLeaves() {
 
 void drawRiverbed() {
     bindProgramFragment(g_PFBackground);
-    bindProgramFragmentStore(g_PFSBackground);
+    bindProgramStore(g_PFSBackground);
     bindTexture(g_PFBackground, 0, g_TRiverbed);
     drawSimpleMesh(g_WaterMesh);
 }

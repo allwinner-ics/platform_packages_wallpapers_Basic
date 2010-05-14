@@ -149,7 +149,7 @@ class NexusRS extends RenderScriptScene {
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
         builder.setDitherEnable(false);
         ProgramStore solid = builder.create();
-        mRS.contextBindProgramFragmentStore(solid);
+        mRS.contextBindProgramStore(solid);
 
         builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE);
         mScript.set_gPSBlend(builder.create());
