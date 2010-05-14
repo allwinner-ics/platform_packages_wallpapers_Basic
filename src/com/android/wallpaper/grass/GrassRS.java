@@ -209,10 +209,8 @@ class GrassRS extends RenderScriptScene {
         meshBuilder.setIndexType(Element.INDEX_16(mRS), mIndicies);
         meshBuilder.setPrimitive(Primitive.TRIANGLE);
         mBladesMesh = meshBuilder.create();
-        //mBladesMesh.setName("BladesMesh");
 
         //mBladesBuffer = mBladesMesh.createVertexAllocation(vertexSlot);
-        //mBladesBuffer.setName("BladesBuffer");
         mBladesMesh.bindVertexAllocation(mVertexBuffer.getAllocation(), 0);
         mBladesIndicies = mBladesMesh.createIndexAllocation();
         mBladesMesh.bindIndexAllocation(mBladesIndicies);

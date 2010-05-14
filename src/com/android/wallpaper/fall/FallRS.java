@@ -197,7 +197,6 @@ class FallRS extends RenderScriptScene {
         }
 
         mMesh = tmb.create();
-        mMesh.setName("WaterMesh");
 
         mMeshWidth = wResolution + 1;
         mMeshHeight = hResolution + 1;
@@ -247,22 +246,20 @@ class FallRS extends RenderScriptScene {
     }
 
     private void loadTextures() {
-        mScript.set_g_TLeaves(loadTextureARGB(R.drawable.leaves, "TLeaves"));
-        mScript.set_g_TRiverbed(loadTexture(R.drawable.pond, "TRiverbed"));
+        mScript.set_g_TLeaves(loadTextureARGB(R.drawable.leaves));
+        mScript.set_g_TRiverbed(loadTexture(R.drawable.pond));
     }
 
-    private Allocation loadTexture(int id, String name) {
+    private Allocation loadTexture(int id) {
         final Allocation allocation = Allocation.createFromBitmapResource(mRS, mResources,
                 id, RGB_565(mRS), false);
-        allocation.setName(name);
         allocation.uploadToTexture(0);
         return allocation;
     }
 
-    private Allocation loadTextureARGB(int id, String name) {
+    private Allocation loadTextureARGB(int id) {
         Bitmap b = BitmapFactory.decodeResource(mResources, id, mOptionsARGB);
         final Allocation allocation = Allocation.createFromBitmap(mRS, b, RGBA_8888(mRS), false);
-        allocation.setName(name);
         allocation.uploadToTexture(0);
         return allocation;
     }
@@ -279,7 +276,6 @@ class FallRS extends RenderScriptScene {
         builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
                            ProgramFragment.Builder.Format.RGBA, 0);
         mPfBackground = builder.create();
-        mPfBackground.setName("PFBackground");
         mPfBackground.bindSampler(mSampler, 0);
 
         mScript.set_g_PFBackground(mPfBackground);
@@ -288,7 +284,6 @@ class FallRS extends RenderScriptScene {
         builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
                            ProgramFragment.Builder.Format.RGBA, 0);
         mPfSky = builder.create();
-        mPfSky.setName("PFSky");
         mPfSky.bindSampler(mSampler, 0);
 
         mScript.set_g_PFSky(mPfSky);
@@ -301,7 +296,6 @@ class FallRS extends RenderScriptScene {
         builder.setDitherEnable(false);
         builder.setDepthMask(true);
         mPfsBackground = builder.create();
-        mPfsBackground.setName("PFSBackground");
 
         builder = new ProgramStore.Builder(mRS, null, null);
         builder.setDepthFunc(ALWAYS);
@@ -309,7 +303,6 @@ class FallRS extends RenderScriptScene {
         builder.setDitherEnable(false);
         builder.setDepthMask(true);
         mPfsLeaf = builder.create();
-        mPfsLeaf.setName("PFSLeaf");
 
         mScript.set_g_PFSLeaf(mPfsLeaf);
         mScript.set_g_PFSBackground(mPfsBackground);
@@ -322,7 +315,6 @@ class FallRS extends RenderScriptScene {
         ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
         mPvSky = builder.create();
         mPvSky.bindAllocation(mPvOrthoAlloc);
-        mPvSky.setName("PVSky");
 
         mScript.set_g_PVSky(mPvSky);
 
@@ -383,7 +375,6 @@ class FallRS extends RenderScriptScene {
         sb.addInput(mMesh.getVertexType(0).getElement());
         mPvWater = sb.create();
         mPvWater.bindAllocation(mPvOrthoAlloc);
-        mPvWater.setName("PVWater");
         mPvWater.bindConstants(mUniformAlloc, 1);
 
         mScript.set_g_PVWater(mPvWater);
