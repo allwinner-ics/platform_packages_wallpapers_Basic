@@ -23,15 +23,15 @@
 #define TWO_PI 6.283f
 #define ELLIPSE_TWIST 0.023333333f
 
-static float angle;
+static float angle = 50.f;
 static int gOldWidth;
 static int gOldHeight;
 static int gWidth;
 static int gHeight;
 static float gSpeed[12000];
+static int gGalaxyRadius = 300;
+static rs_allocation gParticlesBuffer;
 
-int gParticlesCount;
-int gGalaxyRadius;
 float gXOffset;
 int gIsPreview;
 
@@ -46,7 +46,6 @@ rs_program_store gPSBackground;
 rs_allocation gTSpace;
 rs_allocation gTFlares;
 rs_allocation gTLight1;
-rs_allocation gParticlesBuffer;
 rs_mesh gParticlesMesh;
 
 typedef struct __attribute__((packed, aligned(4))) Particle_s {
@@ -57,14 +56,7 @@ typedef struct __attribute__((packed, aligned(4))) Particle_s {
 Particle_t *Particles;
 
 
-#pragma rs export_var(gParticlesCount, gGalaxyRadius, gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPVBkOrtho, gPSLights, gPSBackground, gTSpace, gTFlares, gTLight1, gParticlesBuffer, gParticlesMesh, Particles)
-
-/**
- * Script initialization. Called automatically.
- */
-void init() {
-    angle = 50.0f;
-}
+#pragma rs export_var(gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPVBkOrtho, gPSLights, gPSBackground, gTSpace, gTFlares, gTLight1, gParticlesMesh, Particles)
 
 /**
  * Helper function to generate the stars.
@@ -133,7 +125,8 @@ void initParticles() {
 
     Particle_t *part = Particles;
     float scale = gGalaxyRadius / (gWidth * 0.5f);
-    for (int i = 0; i < gParticlesCount; i ++) {
+    int count = allocGetDimX(gParticlesBuffer);
+    for (int i = 0; i < count; i ++) {
         createParticle(part, i, scale);
         part++;
     }
@@ -190,16 +183,19 @@ static void drawParticles(float offset) {
     //pointAttenuation(0.1f + 0.3f * fabs(offset), 0.0f, 0.06f  + 0.1f *  fabs(offset));
 
     Particle_t *vtx = Particles;
-    for (int i = 0; i < gParticlesCount; i++) {
+    int count = allocGetDimX(gParticlesBuffer);
+    for (int i = 0; i < count; i++) {
         vtx->/*position.*/x = vtx->/*position.*/x + gSpeed[i];
         vtx++;
     }
 
     uploadToBufferObject(gParticlesBuffer);
-    drawSimpleMeshRange(gParticlesMesh, 0, gParticlesCount);
+    drawSimpleMesh(gParticlesMesh);
 }
 
 int root() {
+    gParticlesBuffer = rsGetAllocation(Particles);
+
     bindProgramVertex(gPVBkOrtho);
     bindProgramFragment(gPFBackground);
     bindProgramStore(gPSBackground);
@@ -214,7 +210,6 @@ int root() {
 
     float offset = mix(-1.0f, 1.0f, gXOffset);
     drawSpace();
-
     drawParticles(offset);
     drawLights();
 

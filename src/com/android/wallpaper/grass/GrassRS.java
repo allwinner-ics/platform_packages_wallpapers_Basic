@@ -152,7 +152,6 @@ class GrassRS extends RenderScriptScene {
         mScript.set_gHeight(mHeight);
         mScript.set_gXOffset(isPreview ? 0.5f : 0.f);
         mScript.set_gIsPreview(isPreview ? 1 : 0);
-        mScript.set_gBladesBuffer(mVertexBuffer.getAllocation());
         mScript.set_gBladesMesh(mBladesMesh);
 
         mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);

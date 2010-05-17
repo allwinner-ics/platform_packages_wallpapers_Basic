@@ -51,7 +51,6 @@ rs_allocation gTSunset;
 rs_allocation gTSunrise;
 rs_allocation gTSky;
 rs_allocation gTAa;
-rs_allocation gBladesBuffer;
 rs_mesh gBladesMesh;
 
 
@@ -82,7 +81,7 @@ typedef struct Vertex_s {
 Vertex_t *Verticies;
 
 
-#pragma rs export_var(gBladesCount, gIndexCount, gWidth, gHeight, gXOffset, gDawn, gMorning, gAfternoon, gDusk, gIsPreview, gPVBackground, gPFBackground, gPFGrass, gPSBackground, gTNight, gTSunset, gTSunrise, gTSky, gTAa, gBladesBuffer, gBladesMesh, Blades, Verticies)
+#pragma rs export_var(gBladesCount, gIndexCount, gWidth, gHeight, gXOffset, gDawn, gMorning, gAfternoon, gDusk, gIsPreview, gPVBackground, gPFBackground, gPFGrass, gPSBackground, gTNight, gTSunset, gTSunrise, gTSky, gTAa, gBladesMesh, Blades, Verticies)
 
 
 
@@ -107,7 +106,6 @@ void debugAll()
     debugP(16, (void *)gTSunrise);
     debugP(17, (void *)gTSky);
     debugP(18, (void *)gTAa);
-    debugP(19, (void *)gBladesBuffer);
     debugP(20, (void *)gBladesMesh);
     debugP(21, (void *)Blades);
     debugP(22, (void *)Verticies);
@@ -253,7 +251,7 @@ void drawBlades(float brightness, float xOffset) {
         bladeStruct ++;
     }
 
-    uploadToBufferObject(gBladesBuffer);
+    uploadToBufferObject(rsGetAllocation(Verticies));
     drawSimpleMeshRange(gBladesMesh, 0, gIndexCount);
 }
 

@@ -18,9 +18,9 @@ public class ScriptC_Grass
     public void bind_Blades(ScriptField_Blade f) {
         mField_Blades = f;
         if (f == null) {
-            bindAllocation(null, 21);
+            bindAllocation(null, 20);
         } else {
-            bindAllocation(f.getAllocation(), 21);
+            bindAllocation(f.getAllocation(), 20);
         }
     }
     public ScriptField_Blade get_Blades() {
@@ -30,9 +30,9 @@ public class ScriptC_Grass
     public void bind_Verticies(ScriptField_Vertex f) {
         mField_Verticies = f;
         if (f == null) {
-            bindAllocation(null, 22);
+            bindAllocation(null, 21);
         } else {
-            bindAllocation(f.getAllocation(), 22);
+            bindAllocation(f.getAllocation(), 21);
         }
     }
     public ScriptField_Vertex get_Verticies() {
@@ -138,43 +138,12 @@ public class ScriptC_Grass
         mField_gTAa = v;
         setVar(18, v.getID());
     }
-    private Allocation mField_gBladesBuffer;
-    public void set_gBladesBuffer(Allocation v) {
-        mField_gBladesBuffer = v;
-        setVar(19, v.getID());
-    }
     private SimpleMesh mField_gBladesMesh;
     public void set_gBladesMesh(SimpleMesh v) {
         mField_gBladesMesh = v;
-        setVar(20, v.getID());
+        setVar(19, v.getID());
     }
 
-
-/*
-    private final static int mFieldIndex_gBladesCount = 0;
-    private final static int mFieldIndex_gIndexCount = 1;
-    private final static int mFieldIndex_gWidth = 2;
-    private final static int mFieldIndex_gHeight = 3;
-    private final static int mFieldIndex_gXOffset = 4;
-    private final static int mFieldIndex_gDawn = 5;
-    private final static int mFieldIndex_gMorning = 6;
-    private final static int mFieldIndex_gAfternoon = 7;
-    private final static int mFieldIndex_gDusk = 8;
-    private final static int mFieldIndex_gIsPreview = 9;
-    private final static int mFieldIndex_gPVBackground = 10;
-    private final static int mFieldIndex_gPFBackground = 11;
-    private final static int mFieldIndex_gPFGrass = 12;
-    private final static int mFieldIndex_gPSBackground = 13;
-    private final static int mFieldIndex_gTNight = 14;
-    private final static int mFieldIndex_gTSunset = 15;
-    private final static int mFieldIndex_gTSunrise = 16;
-    private final static int mFieldIndex_gTSky = 17;
-    private final static int mFieldIndex_gTAa = 18;
-    private final static int mFieldIndex_gBladesBuffer = 19;
-    private final static int mFieldIndex_gBladesMesh = 20;
-    private final static int mFieldIndex_Blades = 21;
-    private final static int mFieldIndex_Verticies = 22;
-*/
 
     public void invokable_updateBlades() {
         invoke(1);

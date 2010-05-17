@@ -40,7 +40,6 @@ import com.android.wallpaper.R;
 import com.android.wallpaper.RenderScriptScene;
 
 class GalaxyRS extends RenderScriptScene {
-    private static final int GALAXY_RADIUS = 300;
     private static final int PARTICLES_COUNT = 12000;
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
@@ -58,8 +57,6 @@ class GalaxyRS extends RenderScriptScene {
     @Override
     protected ScriptC createScript() {
         mScript = new ScriptC_galaxy(mRS, mResources, R.raw.galaxy_bc);
-        mScript.set_gParticlesCount(PARTICLES_COUNT);
-        mScript.set_gGalaxyRadius(GALAXY_RADIUS);
         mScript.set_gIsPreview(isPreview() ? 1 : 0);
         if (isPreview()) {
             mScript.set_gXOffset(0.5f);
@@ -87,7 +84,6 @@ class GalaxyRS extends RenderScriptScene {
         mParticlesMesh = meshBuilder.create();
 
         mScript.set_gParticlesMesh(mParticlesMesh);
-        mScript.set_gParticlesBuffer(p.getAllocation());
         mScript.bind_Particles(p);
         mParticlesMesh.bindVertexAllocation(p.getAllocation(), 0);
     }
