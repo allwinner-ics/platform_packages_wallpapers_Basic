@@ -18,6 +18,9 @@
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
 
+#pragma stateVertex(parent);
+#pragma stateStore(parent);
+
 #define ELLIPSE_RATIO 0.892f
 #define PI 3.1415f
 #define TWO_PI 6.283f
@@ -39,9 +42,7 @@ rs_program_fragment gPFBackground;
 rs_program_fragment gPFStars;
 rs_program_vertex gPVStars;
 rs_program_vertex gPVBkProj;
-rs_program_vertex gPVBkOrtho;
 rs_program_store gPSLights;
-rs_program_store gPSBackground;
 
 rs_allocation gTSpace;
 rs_allocation gTFlares;
@@ -56,7 +57,7 @@ typedef struct __attribute__((packed, aligned(4))) Particle_s {
 Particle_t *Particles;
 
 
-#pragma rs export_var(gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPVBkOrtho, gPSLights, gPSBackground, gTSpace, gTFlares, gTLight1, gParticlesMesh, Particles)
+#pragma rs export_var(gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPSLights, gTSpace, gTFlares, gTLight1, gParticlesMesh, Particles)
 
 /**
  * Helper function to generate the stars.
@@ -195,10 +196,7 @@ static void drawParticles(float offset) {
 
 int root() {
     gParticlesBuffer = rsGetAllocation(Particles);
-
-    bindProgramVertex(gPVBkOrtho);
     bindProgramFragment(gPFBackground);
-    bindProgramStore(gPSBackground);
 
     gWidth = getWidth();
     gHeight = getHeight();

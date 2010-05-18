@@ -50,47 +50,35 @@ public class ScriptC_galaxy
         setVar(5, v.getID());
     }
 
-    private ProgramVertex mField_gPVBkOrtho;
-    public void set_gPVBkOrtho(ProgramVertex v) {
-        mField_gPVBkOrtho = v;
-        setVar(6, v.getID());
-    }
-
     private ProgramStore mField_gPSLights;
     public void set_gPSLights(ProgramStore v) {
         mField_gPSLights = v;
-        setVar(7, v.getID());
-    }
-
-    private ProgramStore mField_gPSBackground;
-    public void set_gPSBackground(ProgramStore v) {
-        mField_gPSBackground = v;
-        setVar(8, v.getID());
+        setVar(6, v.getID());
     }
 
 
     private Allocation mField_gTSpace;
     public void set_gTSpace(Allocation v) {
         mField_gTSpace = v;
-        setVar(9, v.getID());
+        setVar(7, v.getID());
     }
 
     private Allocation mField_gTFlares;
     public void set_gTFlares(Allocation v) {
         mField_gTFlares = v;
-        setVar(10, v.getID());
+        setVar(8, v.getID());
     }
 
     private Allocation mField_gTLight1;
     public void set_gTLight1(Allocation v) {
         mField_gTLight1 = v;
-        setVar(11, v.getID());
+        setVar(9, v.getID());
     }
 
     private SimpleMesh mField_gParticlesMesh;
     public void set_gParticlesMesh(SimpleMesh v) {
         mField_gParticlesMesh = v;
-        setVar(12, v.getID());
+        setVar(10, v.getID());
     }
 
 
@@ -98,9 +86,9 @@ public class ScriptC_galaxy
     public void bind_Particles(ScriptField_Particle f) {
         mField_Particle = f;
         if (f == null) {
-            bindAllocation(null, 13);
+            bindAllocation(null, 11);
         } else {
-            bindAllocation(f.getAllocation(), 13);
+            bindAllocation(f.getAllocation(), 11);
         }
     }
     public ScriptField_Particle get_Particle() {

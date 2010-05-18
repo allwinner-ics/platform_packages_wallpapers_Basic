@@ -142,7 +142,7 @@ class GalaxyRS extends RenderScriptScene {
     private void createProgramFragmentStore() {
         ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
-        mScript.set_gPSBackground(builder.create());
+        mRS.contextBindProgramStore(builder.create());
 
         builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE);
         mScript.set_gPSLights(builder.create());
@@ -155,7 +155,7 @@ class GalaxyRS extends RenderScriptScene {
         ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
         ProgramVertex pvbo = builder.create();
         pvbo.bindAllocation(mPvOrthoAlloc);
-        mScript.set_gPVBkOrtho(pvbo);
+        mRS.contextBindProgramVertex(pvbo);
 
         mPvProjectionAlloc = new ProgramVertex.MatrixAllocation(mRS);
         mPvProjectionAlloc.setupProjectionNormalized(mWidth, mHeight);

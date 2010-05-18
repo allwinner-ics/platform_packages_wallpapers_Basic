@@ -49,31 +49,22 @@ public class ScriptC_nexus
         setVar(5, v.getID());
     }
 
-    private ProgramVertex mField_gPVOrtho;
-    public void set_gPVOrtho(ProgramVertex v) {
-        mField_gPVOrtho = v;
-        setVar(6, v.getID());
-    }
-    public ProgramVertex get_gPVOrtho() {
-        return mField_gPVOrtho;
-    }
-
     private Allocation mField_gTBackground;
     public void set_gTBackground(Allocation v) {
         mField_gTBackground = v;
-        setVar(7, v.getID());
+        setVar(6, v.getID());
     }
 
     private Allocation mField_gTPulse;
     public void set_gTPulse(Allocation v) {
         mField_gTPulse = v;
-        setVar(8, v.getID());
+        setVar(7, v.getID());
     }
 
     private Allocation mField_gTGlow;
     public void set_gTGlow(Allocation v) {
         mField_gTGlow = v;
-        setVar(9, v.getID());
+        setVar(8, v.getID());
     }
 
 

@@ -48,7 +48,6 @@ import java.util.TimeZone;
 class NexusRS extends RenderScriptScene {
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
-    private ProgramVertex mPvOrtho;
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
     private float mXOffset;
@@ -161,10 +160,9 @@ class NexusRS extends RenderScriptScene {
 
         ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
         pvb.setTextureMatrixEnable(true);
-        mPvOrtho = pvb.create();
-        mPvOrtho.bindAllocation(mPvOrthoAlloc);
-        mRS.contextBindProgramVertex(mPvOrtho);
-        mScript.set_gPVOrtho(mPvOrtho);
+        ProgramVertex pv = pvb.create();
+        pv.bindAllocation(mPvOrthoAlloc);
+        mRS.contextBindProgramVertex(pv);
     }
 
     @Override

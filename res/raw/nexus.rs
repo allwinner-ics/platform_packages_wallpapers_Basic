@@ -17,8 +17,7 @@
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_types.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
-//#pragma stateVertex(PVOrtho)
-//#pragma stateStore(PSSolid)
+#pragma stateVertex(parent)
 
 #define MAX_PULSES           20
 #define MAX_EXTRAS           40
@@ -59,13 +58,12 @@ int gMode;
 rs_program_fragment gPFTexture;
 rs_program_store gPSBlend;
 rs_program_fragment gPFTexture565;
-rs_program_vertex gPVOrtho;
 
 rs_allocation gTBackground;
 rs_allocation gTPulse;
 rs_allocation gTGlow;
 
-#pragma rs export_var(gIsPreview, gXOffset, gMode, gPFTexture, gPSBlend, gPFTexture565, gPVOrtho, gTBackground, gTPulse, gTGlow)
+#pragma rs export_var(gIsPreview, gXOffset, gMode, gPFTexture, gPSBlend, gPFTexture565, gTBackground, gTPulse, gTGlow)
 
 
 void setColor(int c) {
@@ -298,8 +296,6 @@ int root() {
     gRotate = gWidth > gHeight ? 1 : 0;
 
     gNow = uptimeMillis();
-
-    bindProgramVertex(gPVOrtho);
 
     float matrix[16];
     matrixLoadIdentity(matrix);
