@@ -79,6 +79,136 @@ Vertex_t *Verticies;
 
 #pragma rs export_var(gBladesCount, gIndexCount, gWidth, gHeight, gXOffset, gDawn, gMorning, gAfternoon, gDusk, gIsPreview, gPVBackground, gPFBackground, gPFGrass, gPSBackground, gTNight, gTSunset, gTSunrise, gTSky, gTAa, gBladesMesh, Blades, Verticies)
 
+#define B 0x100
+#define BM 0xff
+#define N 0x1000
+
+static int p[B + B + 2];
+static float g3[B + B + 2][3];
+static float g2[B + B + 2][2];
+static float g1[B + B + 2];
+
+static float noise_sCurve(float t)
+{
+    return t * t * (3.0f - 2.0f * t);
+}
+
+static void normalizef2(float v[])
+{
+    float s = (float)sqrt(v[0] * v[0] + v[1] * v[1]);
+    v[0] = v[0] / s;
+    v[1] = v[1] / s;
+}
+
+static void normalizef3(float v[])
+{
+    float s = (float)sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    v[0] = v[0] / s;
+    v[1] = v[1] / s;
+    v[2] = v[2] / s;
+}
+
+void init()
+{
+    int i, j, k;
+
+    for (i = 0; i < B; i++) {
+        p[i] = i;
+
+        g1[i] = (float)(rsRand(B * 2) - B) / B;
+
+        for (j = 0; j < 2; j++)
+            g2[i][j] = (float)(rsRand(B * 2) - B) / B;
+        normalizef2(g2[i]);
+
+        for (j = 0; j < 3; j++)
+            g3[i][j] = (float)(rsRand(B * 2) - B) / B;
+        normalizef3(g3[i]);
+    }
+
+    for (i = B-1; i >= 0; i--) {
+        k = p[i];
+        p[i] = p[j = rsRand(B)];
+        p[j] = k;
+    }
+
+    for (i = 0; i < B + 2; i++) {
+        p[B + i] = p[i];
+        g1[B + i] = g1[i];
+        for (j = 0; j < 2; j++)
+            g2[B + i][j] = g2[i][j];
+        for (j = 0; j < 3; j++)
+            g3[B + i][j] = g3[i][j];
+    }
+}
+
+static float noisef(float x)
+{
+    int bx0, bx1;
+    float rx0, rx1, sx, t, u, v;
+
+    t = x + N;
+    bx0 = ((int)t) & BM;
+    bx1 = (bx0+1) & BM;
+    rx0 = t - (int)t;
+    rx1 = rx0 - 1.0f;
+
+    sx = noise_sCurve(rx0);
+
+    u = rx0 * g1[p[bx0]];
+    v = rx1 * g1[p[bx1]];
+    return 2.3f * mix(u, v, sx);
+}
+
+static float noisef2(float x, float y)
+{
+    int bx0, bx1, by0, by1, b00, b10, b01, b11;
+    float rx0, rx1, ry0, ry1, sx, sy, a, b, t, u, v;
+    float *q;
+    int i, j;
+
+    t = x + N;
+    bx0 = ((int)t) & BM;
+    bx1 = (bx0+1) & BM;
+    rx0 = t - (int)t;
+    rx1 = rx0 - 1.0f;
+
+    t = y + N;
+    by0 = ((int)t) & BM;
+    by1 = (by0+1) & BM;
+    ry0 = t - (int)t;
+    ry1 = ry0 - 1.0f;
+
+    i = p[bx0];
+    j = p[bx1];
+
+    b00 = p[i + by0];
+    b10 = p[j + by0];
+    b01 = p[i + by1];
+    b11 = p[j + by1];
+
+    sx = noise_sCurve(rx0);
+    sy = noise_sCurve(ry0);
+
+    q = g2[b00]; u = rx0 * q[0] + ry0 * q[1];
+    q = g2[b10]; v = rx1 * q[0] + ry0 * q[1];
+    a = mix(u, v, sx);
+
+    q = g2[b01]; u = rx0 * q[0] + ry1 * q[1];
+    q = g2[b11]; v = rx1 * q[0] + ry1 * q[1];
+    b = mix(u, v, sx);
+
+    return 1.5f * mix(a, b, sy);
+}
+
+static float turbulencef2(float x, float y, float octaves)
+{
+    float t = 0.0f;
+
+    for (float f = 1.0f; f <= octaves; f *= 2)
+        t += fabs(noisef2(f * x, f * y)) / f;
+    return t;
+}
 
 void updateBlades()
 {
