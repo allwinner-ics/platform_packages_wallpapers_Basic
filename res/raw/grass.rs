@@ -13,10 +13,6 @@
 // limitations under the License.
 
 #pragma version(1)
-//#pragma stateVertex(default)
-//#pragma stateFragment(default)
-//#pragma stateStore(default)
-
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_types.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
@@ -84,38 +80,11 @@ Vertex_t *Verticies;
 #pragma rs export_var(gBladesCount, gIndexCount, gWidth, gHeight, gXOffset, gDawn, gMorning, gAfternoon, gDusk, gIsPreview, gPVBackground, gPFBackground, gPFGrass, gPSBackground, gTNight, gTSunset, gTSunrise, gTSky, gTAa, gBladesMesh, Blades, Verticies)
 
 
-
-void debugAll()
-{
-    debugP(0, (void *)gBladesCount);
-    debugP(1, (void *)gIndexCount);
-    debugP(2, (void *)gWidth);
-    debugP(3, (void *)gHeight);
-    debugPf(4, gXOffset);
-    debugPf(5, gDawn);
-    debugPf(6, gMorning);
-    debugPf(7, gAfternoon);
-    debugPf(8, gDusk);
-    debugP(9, (void *)gIsPreview);
-    debugP(10, (void *)gPVBackground);
-    debugP(11, (void *)gPFBackground);
-    debugP(12, (void *)gPFGrass);
-    debugP(13, (void *)gPSBackground);
-    debugP(14, (void *)gTNight);
-    debugP(15, (void *)gTSunset);
-    debugP(16, (void *)gTSunrise);
-    debugP(17, (void *)gTSky);
-    debugP(18, (void *)gTAa);
-    debugP(20, (void *)gBladesMesh);
-    debugP(21, (void *)Blades);
-    debugP(22, (void *)Verticies);
-}
-
 void updateBlades()
 {
     Blade_t *bladeStruct = Blades;
     for (int i = 0; i < gBladesCount; i ++) {
-        float xpos = randf2(-gWidth, gWidth);
+        float xpos = rsRand(-gWidth, gWidth);
         bladeStruct->xPos = xpos;
         bladeStruct->turbulencex = xpos * 0.006f;
         bladeStruct->yPos = gHeight;
@@ -125,9 +94,9 @@ void updateBlades()
 
 float time(int isPreview) {
     if (REAL_TIME && !isPreview) {
-        return (hour() * 3600.0f + minute() * 60.0f + second()) / SECONDS_IN_DAY;
+        return (rsHour() * 3600.0f + rsMinute() * 60.0f + rsSecond()) / SECONDS_IN_DAY;
     }
-    float t = uptimeMillis() / 30000.0f;
+    float t = rsUptimeMillis() / 30000.0f;
     return t - (int) t;
 }
 
@@ -135,9 +104,13 @@ void alpha(float a) {
     color(1.0f, 1.0f, 1.0f, a);
 }
 
+static float normf(float start, float stop, float value) {
+    return (value - start) / (stop - start);
+}
+
 void drawNight(int width, int height) {
-    bindTexture(gPFBackground, 0, gTNight);
-    drawQuadTexCoords(
+    rsgBindTexture(gPFBackground, 0, gTNight);
+    rsgDrawQuadTexCoords(
             0.0f, -32.0f, 0.0f,
             0.0f, 1.0f,
             width, -32.0f, 0.0f,
@@ -149,18 +122,18 @@ void drawNight(int width, int height) {
 }
 
 void drawSunrise(int width, int height) {
-    bindTexture(gPFBackground, 0, gTSunrise);
-    drawRect(0.0f, 0.0f, width, height, 0.0f);
+    rsgBindTexture(gPFBackground, 0, gTSunrise);
+    rsgDrawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
 void drawNoon(int width, int height) {
-    bindTexture(gPFBackground, 0, gTSky);
-    drawRect(0.0f, 0.0f, width, height, 0.0f);
+    rsgBindTexture(gPFBackground, 0, gTSky);
+    rsgDrawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
 void drawSunset(int width, int height) {
-    bindTexture(gPFBackground, 0, gTSunset);
-    drawRect(0.0f, 0.0f, width, height, 0.0f);
+    rsgBindTexture(gPFBackground, 0, gTSunset);
+    rsgDrawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
 int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
@@ -202,7 +175,6 @@ int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
     v[1].t = 0.f;                           // V2.t
     v += 2;
 
-    //debugPi(200, size);
     for ( ; size > 0; size -= 1) {
         float topX = bottomX - cos(currentAngle) * bladeStruct->lengthX;
         float topY = bottomY - sin(currentAngle) * bladeStruct->lengthY;
@@ -239,11 +211,11 @@ int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
 
 void drawBlades(float brightness, float xOffset) {
     // For anti-aliasing
-    bindTexture(gPFGrass, 0, gTAa);
+    rsgBindTexture(gPFGrass, 0, gTAa);
 
     Blade_t *bladeStruct = Blades;
     Vertex_t *vtx = Verticies;
-    float now = uptimeMillis() * 0.00004f;
+    float now = rsUptimeMillis() * 0.00004f;
 
     for (int i = 0; i < gBladesCount; i += 1) {
         int offset = drawBlade(bladeStruct, vtx, brightness, xOffset, now);
@@ -251,20 +223,19 @@ void drawBlades(float brightness, float xOffset) {
         bladeStruct ++;
     }
 
-    uploadToBufferObject(rsGetAllocation(Verticies));
-    drawSimpleMeshRange(gBladesMesh, 0, gIndexCount);
+    rsgUploadToBufferObject(rsGetAllocation(Verticies));
+    rsgDrawSimpleMesh(gBladesMesh, 0, gIndexCount);
 }
 
 int root(int launchID) {
-    //debugAll();
     float x = mix((float)gWidth, 0.f, gXOffset);
 
     float now = time(gIsPreview);
     alpha(1.0f);
 
-    bindProgramVertex(gPVBackground);
-    bindProgramFragment(gPFBackground);
-    bindProgramStore(gPSBackground);
+    rsgBindProgramVertex(gPVBackground);
+    rsgBindProgramFragment(gPFBackground);
+    rsgBindProgramStore(gPSBackground);
 
     float newB = 1.0f;
     if (now >= 0.0f && now < gDawn) {                    // Draw night
@@ -303,7 +274,7 @@ int root(int launchID) {
         newB = 0.0f;
     }
 
-    bindProgramFragment(gPFGrass);
+    rsgBindProgramFragment(gPFGrass);
     drawBlades(newB, x);
 
     return 50;

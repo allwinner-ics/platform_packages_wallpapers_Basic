@@ -90,7 +90,6 @@ class NexusRS extends RenderScriptScene {
         mScript.set_gTBackground(loadTexture(R.drawable.pyramid_background));
         mScript.set_gTPulse(loadTextureARGB(R.drawable.pulse));
         mScript.set_gTGlow(loadTextureARGB(R.drawable.glow));
-        mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mScript.setTimeZone(TimeZone.getDefault().getID());
         mScript.invokable_initPulses();
         return mScript;

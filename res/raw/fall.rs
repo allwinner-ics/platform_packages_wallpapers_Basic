@@ -66,7 +66,7 @@ rs_program_store g_PFSBackground;
 //float skyOffsetX;
 //float skyOffsetY;
 float g_DT;
-float g_LastTime;
+int64_t g_LastTime;
 
 typedef struct Drop_s {
     float ampS;
@@ -99,29 +99,6 @@ static Leaves_t* gNextLeaves[LEAVES_COUNT];
 
 #pragma rs export_var(g_glWidth, g_glHeight, g_meshWidth, g_meshHeight, g_xOffset, g_rotate, g_newDropX, g_newDropY, g_PVWater, g_PVSky, g_PFSky, g_PFSLeaf, g_PFBackground, g_TLeaves, g_TRiverbed, g_WaterMesh, g_Constants, g_PFSBackground)
 
-void debugAll()
-{
-    debugPf(100, g_glWidth);
-    debugPf(101, g_glHeight);
-    debugPf(102, g_meshWidth);
-    debugPf(103, g_meshHeight);
-    debugPf(104, g_xOffset);
-    debugPf(105, g_rotate);
-    debugP(106, (void *)g_newDropX);
-    debugP(107, (void *)g_newDropY);
-
-    debugP(201, (void *)g_PVWater);
-    debugP(202, (void *)g_PVSky);
-    debugP(203, (void *)g_PFSky);
-    debugP(204, (void *)g_PFSLeaf);
-    debugP(205, (void *)g_PFBackground);
-    debugP(206, (void *)g_TLeaves);
-    debugP(207, (void *)g_TRiverbed);
-    debugP(208, (void *)g_WaterMesh);
-    debugP(209, (void *)g_Constants);
-
-}
-
 void initLeaves() {
     struct Leaves_s *leaf = gLeavesStore;
     // globals haven't been set at this point yet. We need to find the correct
@@ -132,19 +109,18 @@ void initLeaves() {
     int i;
     for (i = 0; i < LEAVES_COUNT; i ++) {
         gLeaves[i] = leaf;
-        int sprite = randf(LEAVES_TEXTURES_COUNT);
-        leaf->x = randf2(-width, width);
-        leaf->y = randf2(-height * 0.5f, height * 0.5f);
-        leaf->scale = randf2(0.4f, 0.5f);
-        leaf->angle = randf2(0.0f, 360.0f);
-        leaf->spin = degrees(randf2(-0.02f, 0.02f)) * 0.25f;
+        int sprite = rsRand(LEAVES_TEXTURES_COUNT);
+        leaf->x = rsRand(-width, width);
+        leaf->y = rsRand(-height * 0.5f, height * 0.5f);
+        leaf->scale = rsRand(0.4f, 0.5f);
+        leaf->angle = rsRand(0.0f, 360.0f);
+        leaf->spin = degrees(rsRand(-0.02f, 0.02f)) * 0.25f;
         leaf->u1 = (float)sprite / (float) LEAVES_TEXTURES_COUNT;
         leaf->u2 = (float)(sprite + 1) / (float) LEAVES_TEXTURES_COUNT;
         leaf->altitude = -1.0f;
         leaf->rippled = 1.0f;
-        leaf->deltaX = randf2(-0.01f, 0.01f);
-        leaf->deltaY = -randf2(0.036f, 0.044f);
-
+        leaf->deltaX = rsRand(-0.01f, 0.01f);
+        leaf->deltaY = -rsRand(0.036f, 0.044f);
         leaf++;
     }
 }
@@ -159,7 +135,7 @@ void init() {
     }
 
     initLeaves();
-    g_LastTime = uptimeMillis();
+    g_LastTime = rsUptimeMillis();
     g_DT = 0.1f;
 }
 
@@ -226,7 +202,7 @@ int drawLeaf(struct Leaves_s *leaf) {
         tz = -a;
     }
 
-    float matrix[16];
+    rs_matrix4x4 matrix;
     if (a > 0.0f) {
 
         float alpha = 1.0f;
@@ -234,21 +210,21 @@ int drawLeaf(struct Leaves_s *leaf) {
 
         color(0.0f, 0.0f, 0.0f, alpha * 0.15f);
 
-        matrixLoadIdentity(matrix);
+        rsMatrixLoadIdentity(&matrix);
         if (!g_rotate) {
-            matrixTranslate(matrix, x - g_xOffset * 2, y, 0);
+            rsMatrixTranslate(&matrix, x - g_xOffset * 2, y, 0);
         } else {
-            matrixTranslate(matrix, x, y, 0);
-            matrixRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
+            rsMatrixTranslate(&matrix, x, y, 0);
+            rsMatrixRotate(&matrix, 90.0f, 0.0f, 0.0f, 1.0f);
         }
 
         float shadowOffet = a * 0.2f;
 
-        matrixScale(matrix, s, s, 1.0f);
-        matrixRotate(matrix, r, 0.0f, 0.0f, 1.0f);
-        vpLoadModelMatrix(matrix);
+        rsMatrixScale(&matrix, s, s, 1.0f);
+        rsMatrixRotate(&matrix, r, 0.0f, 0.0f, 1.0f);
+        rsgProgramVertexLoadModelMatrix(&matrix);
 
-        drawQuadTexCoords(-LEAF_SIZE, -LEAF_SIZE, 0, u1, 1.0f,
+        rsgDrawQuadTexCoords(-LEAF_SIZE, -LEAF_SIZE, 0, u1, 1.0f,
                            LEAF_SIZE, -LEAF_SIZE, 0, u2, 1.0f,
                            LEAF_SIZE,  LEAF_SIZE, 0, u2, 0.0f,
                           -LEAF_SIZE,  LEAF_SIZE, 0, u1, 0.0f);
@@ -258,18 +234,18 @@ int drawLeaf(struct Leaves_s *leaf) {
         color(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    matrixLoadIdentity(matrix);
+    rsMatrixLoadIdentity(&matrix);
     if (!g_rotate) {
-        matrixTranslate(matrix, x - g_xOffset * 2, y, tz);
+        rsMatrixTranslate(&matrix, x - g_xOffset * 2, y, tz);
     } else {
-        matrixTranslate(matrix, x, y, tz);
-        matrixRotate(matrix, 90.0f, 0.0f, 0.0f, 1.0f);
+        rsMatrixTranslate(&matrix, x, y, tz);
+        rsMatrixRotate(&matrix, 90.0f, 0.0f, 0.0f, 1.0f);
     }
-    matrixScale(matrix, s, s, 1.0f);
-    matrixRotate(matrix, r, 0.0f, 0.0f, 1.0f);
-    vpLoadModelMatrix(matrix);
+    rsMatrixScale(&matrix, s, s, 1.0f);
+    rsMatrixRotate(&matrix, r, 0.0f, 0.0f, 1.0f);
+    rsgProgramVertexLoadModelMatrix(&matrix);
 
-    drawQuadTexCoords(-LEAF_SIZE, -LEAF_SIZE, 0, u1, 1.0f,
+    rsgDrawQuadTexCoords(-LEAF_SIZE, -LEAF_SIZE, 0, u1, 1.0f,
                        LEAF_SIZE, -LEAF_SIZE, 0, u2, 1.0f,
                        LEAF_SIZE,  LEAF_SIZE, 0, u2, 0.0f,
                       -LEAF_SIZE,  LEAF_SIZE, 0, u1, 0.0f);
@@ -300,19 +276,19 @@ int drawLeaf(struct Leaves_s *leaf) {
     if (-LEAF_SIZE * s + x > g_glWidth || LEAF_SIZE * s + x < -g_glWidth ||
             LEAF_SIZE * s + y < -g_glHeight * 0.5f) {
 
-        int sprite = randf(LEAVES_TEXTURES_COUNT);
+        int sprite = rsRand(LEAVES_TEXTURES_COUNT);
 
-        leaf->x = randf2(-g_glWidth, g_glWidth);
-        leaf->y = randf2(-g_glHeight * 0.5f, g_glHeight * 0.5f);
+        leaf->x = rsRand(-g_glWidth, g_glWidth);
+        leaf->y = rsRand(-g_glHeight * 0.5f, g_glHeight * 0.5f);
 
-        leaf->scale = randf2(0.4f, 0.5f);
-        leaf->spin = degrees(randf2(-0.02f, 0.02f)) * 0.35f;
+        leaf->scale = rsRand(0.4f, 0.5f);
+        leaf->spin = degrees(rsRand(-0.02f, 0.02f)) * 0.35f;
         leaf->u1 = sprite / (float) LEAVES_TEXTURES_COUNT;
         leaf->u2 = (sprite + 1) / (float) LEAVES_TEXTURES_COUNT;
         leaf->altitude = 0.7f;
         leaf->rippled = -1.0f;
-        leaf->deltaX = randf2(-0.01f, 0.01f);
-        leaf->deltaY = -randf2(0.036f, 0.044f);
+        leaf->deltaX = rsRand(-0.01f, 0.01f);
+        leaf->deltaY = -rsRand(0.036f, 0.044f);
         leaf->newLeaf = 1;
         newLeaf = 1;
     }
@@ -320,10 +296,10 @@ int drawLeaf(struct Leaves_s *leaf) {
 }
 
 void drawLeaves() {
-    bindProgramFragment(g_PFSky);
-    bindProgramStore(g_PFSLeaf);
-    bindProgramVertex(g_PVSky);
-    bindTexture(g_PFSky, 0, g_TLeaves);
+    rsgBindProgramFragment(g_PFSky);
+    rsgBindProgramStore(g_PFSLeaf);
+    rsgBindProgramVertex(g_PVSky);
+    rsgBindTexture(g_PFSky, 0, g_TLeaves);
 
     color(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -362,27 +338,26 @@ void drawLeaves() {
         }
     }
 
-    float matrix[16];
-    matrixLoadIdentity(matrix);
-    vpLoadModelMatrix(matrix);
+    rs_matrix4x4 matrix;
+    rsMatrixLoadIdentity(&matrix);
+    rsgProgramVertexLoadModelMatrix(&matrix);
 }
 
 void drawRiverbed() {
-    bindProgramFragment(g_PFBackground);
-    bindProgramStore(g_PFSBackground);
-    bindTexture(g_PFBackground, 0, g_TRiverbed);
-    drawSimpleMesh(g_WaterMesh);
+    rsgBindProgramFragment(g_PFBackground);
+    rsgBindProgramStore(g_PFSBackground);
+    rsgBindTexture(g_PFBackground, 0, g_TRiverbed);
+    rsgDrawSimpleMesh(g_WaterMesh);
 }
 
 int root(int launchID) {
-    //debugAll();
+    rsgClearColor(0.f, 0.f, 0.f, 1.f);
+
     // Compute dt in seconds.
-    float newTime = uptimeMillis();
-    float timeScale = 0.001f;
-    g_DT = newTime - g_LastTime;
-    g_DT = g_DT * timeScale;
-    g_LastTime = newTime;
+    int64_t newTime = rsUptimeMillis();
+    g_DT = (newTime - g_LastTime) * 0.001f;
     g_DT = min(g_DT, 0.2f);
+    g_LastTime = newTime;
 
     g_Constants->Rotate = (float) g_rotate;
 
@@ -401,11 +376,11 @@ int root(int launchID) {
     }
 
     if (add) {
-        int i = (int)randf(LEAVES_COUNT);
-        genLeafDrop(gLeaves[i], randf(0.3f) + 0.1f);
+        int i = (int)rsRand(LEAVES_COUNT);
+        genLeafDrop(gLeaves[i], rsRand(0.3f) + 0.1f);
     }
 
-    bindProgramVertex(g_PVWater);
+    rsgBindProgramVertex(g_PVWater);
     generateRipples();
     drawRiverbed();
 

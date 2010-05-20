@@ -59,6 +59,10 @@ Particle_t *Particles;
 
 #pragma rs export_var(gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPSLights, gTSpace, gTFlares, gTLight1, gParticlesMesh, Particles)
 
+static float mapf(float minStart, float minStop, float maxStart, float maxStop, float value) {
+    return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
+}
+
 /**
  * Helper function to generate the stars.
  */
@@ -68,8 +72,8 @@ static float randomGauss() {
     float w = 2.f;
 
     while (w >= 1.0f) {
-        x1 = 2.0f * randf2(0.0f, 1.0f) - 1.0f;
-        x2 = 2.0f * randf2(0.0f, 1.0f) - 1.0f;
+        x1 = rsRand(2.0f) - 1.0f;
+        x2 = rsRand(2.0f) - 1.0f;
         w = x1 * x1 + x2 * x2;
     }
 
@@ -81,7 +85,7 @@ static float randomGauss() {
  * Generates the properties for a given star.
  */
 static void createParticle(Particle_t *part, int idx, float scale) {
-    float d = fabs(randomGauss()) * gGalaxyRadius * 0.5f + randf(64.0f);
+    float d = fabs(randomGauss()) * gGalaxyRadius * 0.5f + rsRand(64.0f);
     float id = d / gGalaxyRadius;
     float z = randomGauss() * 0.4f * (1.0f - id);
     float p = -d * ELLIPSE_TWIST;
@@ -97,7 +101,7 @@ static void createParticle(Particle_t *part, int idx, float scale) {
         b = (int) clamp(140.f + id * 115.f, 140.f, 255.f);
     }
     // Stash point size * 10 in Alpha
-    a = (int) (randf2(1.2f, 2.1f) * 60);
+    a = (int) (rsRand(1.2f, 2.1f) * 60);
     part->color = r | g<<8 | b<<16 | a<<24;
 
     if (d > gGalaxyRadius * 0.15f) {
@@ -109,9 +113,9 @@ static void createParticle(Particle_t *part, int idx, float scale) {
     // Map to the projection coordinates (viewport.x = -1.0 -> 1.0)
     d = mapf(-4.0f, gGalaxyRadius + 4.0f, 0.0f, scale, d);
 
-    part->/*position.*/x = randf(TWO_PI);
+    part->/*position.*/x = rsRand(TWO_PI);
     part->/*position.*/y = d;
-    gSpeed[idx] = randf2(0.0015f, 0.0025f) * (0.5f + (scale / d)) * 0.8f;
+    gSpeed[idx] = rsRand(0.0015f, 0.0025f) * (0.5f + (scale / d)) * 0.8f;
 
     part->/*position.*/z = z / 5.0f;
 }
@@ -126,7 +130,7 @@ void initParticles() {
 
     Particle_t *part = Particles;
     float scale = gGalaxyRadius / (gWidth * 0.5f);
-    int count = allocGetDimX(gParticlesBuffer);
+    int count = rsAllocationGetDimX(gParticlesBuffer);
     for (int i = 0; i < count; i ++) {
         createParticle(part, i, scale);
         part++;
@@ -134,9 +138,9 @@ void initParticles() {
 }
 
 static void drawSpace() {
-    bindProgramFragment(gPFBackground);
-    bindTexture(gPFBackground, 0, gTSpace);
-    drawQuadTexCoords(
+    rsgBindProgramFragment(gPFBackground);
+    rsgBindTexture(gPFBackground, 0, gTSpace);
+    rsgDrawQuadTexCoords(
             0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
             gWidth, 0.0f, 0.0f, 2.0f, 1.0f,
             gWidth, gHeight, 0.0f, 2.0f, 0.0f,
@@ -144,9 +148,9 @@ static void drawSpace() {
 }
 
 static void drawLights() {
-    bindProgramVertex(gPVBkProj);
-    bindProgramFragment(gPFBackground);
-    bindTexture(gPFBackground, 0, gTLight1);
+    rsgBindProgramVertex(gPVBkProj);
+    rsgBindProgramFragment(gPFBackground);
+    rsgBindTexture(gPFBackground, 0, gTLight1);
 
     float scale = 512.0f / gWidth;
     float x = -scale - scale * 0.05f;
@@ -154,52 +158,54 @@ static void drawLights() {
 
     scale *= 2.0f;
 
-    drawQuad(x, y, 0.0f,
+    rsgDrawQuad(x, y, 0.0f,
              x + scale * 1.1f, y, 0.0f,
              x + scale * 1.1f, y + scale, 0.0f,
              x, y + scale, 0.0f);
 }
 
 static void drawParticles(float offset) {
-    bindProgramVertex(gPVStars);
-    bindProgramFragment(gPFStars);
-    bindProgramStore(gPSLights);
-    bindTexture(gPFStars, 0, gTFlares);
+    rsgBindProgramVertex(gPVStars);
+    rsgBindProgramFragment(gPFStars);
+    rsgBindProgramStore(gPSLights);
+    rsgBindTexture(gPFStars, 0, gTFlares);
 
     float a = offset * angle;
     float absoluteAngle = fabs(a);
 
-    float matrix[16];
-    matrixLoadTranslate(matrix, 0.0f, 0.0f, 10.0f - 6.0f * absoluteAngle / 50.0f);
+    rs_matrix4x4 matrix;
+    rsMatrixLoadTranslate(&matrix, 0.0f, 0.0f, 10.0f - 6.0f * absoluteAngle / 50.0f);
     if (gHeight > gWidth) {
-        matrixScale(matrix, 6.6f, 6.0f, 1.0f);
+        rsMatrixScale(&matrix, 6.6f, 6.0f, 1.0f);
     } else {
-        matrixScale(matrix, 12.6f, 12.0f, 1.0f);
+        rsMatrixScale(&matrix, 12.6f, 12.0f, 1.0f);
     }
-    matrixRotate(matrix, absoluteAngle, 1.0f, 0.0f, 0.0f);
-    matrixRotate(matrix, a, 0.0f, 0.4f, 0.1f);
-    vpLoadModelMatrix(matrix);
+    rsMatrixRotate(&matrix, absoluteAngle, 1.0f, 0.0f, 0.0f);
+    rsMatrixRotate(&matrix, a, 0.0f, 0.4f, 0.1f);
+    rsgProgramVertexLoadModelMatrix(&matrix);
 
     // quadratic attenuation
     //pointAttenuation(0.1f + 0.3f * fabs(offset), 0.0f, 0.06f  + 0.1f *  fabs(offset));
 
     Particle_t *vtx = Particles;
-    int count = allocGetDimX(gParticlesBuffer);
+    int count = rsAllocationGetDimX(gParticlesBuffer);
     for (int i = 0; i < count; i++) {
         vtx->/*position.*/x = vtx->/*position.*/x + gSpeed[i];
         vtx++;
     }
 
-    uploadToBufferObject(gParticlesBuffer);
-    drawSimpleMesh(gParticlesMesh);
+    rsgUploadToBufferObject(gParticlesBuffer);
+    rsgDrawSimpleMesh(gParticlesMesh);
 }
 
 int root() {
-    gParticlesBuffer = rsGetAllocation(Particles);
-    bindProgramFragment(gPFBackground);
+    rsgClearColor(0.f, 0.f, 0.f, 1.f);
 
-    gWidth = getWidth();
-    gHeight = getHeight();
+    gParticlesBuffer = rsGetAllocation(Particles);
+    rsgBindProgramFragment(gPFBackground);
+
+    gWidth = rsgGetWidth();
+    gHeight = rsgGetHeight();
     if ((gWidth != gOldWidth) || (gHeight != gOldHeight)) {
         initParticles();
         gOldWidth = gWidth;

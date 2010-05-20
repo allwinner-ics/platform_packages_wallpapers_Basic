@@ -151,7 +151,6 @@ class FallRS extends RenderScriptScene {
         createProgramFragment();
         loadTextures();
 
-        mScript.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mScript.setTimeZone(TimeZone.getDefault().getID());
 
         mScript.bind_Constants(mConstants);
