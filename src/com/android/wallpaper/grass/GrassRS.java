@@ -194,12 +194,6 @@ class GrassRS extends RenderScriptScene {
     }
 
     private void createMesh() {
-        Builder elementBuilder = new Builder(mRS);
-        elementBuilder.add(Element.ATTRIB_COLOR_U8_4(mRS), "color");
-        elementBuilder.add(Element.ATTRIB_POSITION_2(mRS), "position");
-        elementBuilder.add(Element.ATTRIB_TEXTURE_2(mRS), "texture");
-        final Element vertexElement = elementBuilder.create();
-
         mVertexBuffer = new ScriptField_Vertex(mRS, mVerticies * 2);
 
         final SimpleMesh.Builder meshBuilder = new SimpleMesh.Builder(mRS);

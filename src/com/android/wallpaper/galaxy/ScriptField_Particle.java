@@ -26,8 +26,8 @@ public class ScriptField_Particle
         mItemArray = new Item[count];
 
         Element.Builder eb = new Element.Builder(rs);
-        eb.add(Element.createAttrib(rs, Element.DataType.UNSIGNED_8, Element.DataKind.USER, 4), "color");
-        eb.add(Element.createAttrib(rs, Element.DataType.FLOAT_32, Element.DataKind.USER, 3), "position");
+        eb.add(Element.U8_4(rs), "color");
+        eb.add(Element.F32_3(rs), "position");
         mElement = eb.create();
 
         init(rs, count);

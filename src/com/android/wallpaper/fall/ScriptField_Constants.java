@@ -49,7 +49,7 @@ public class ScriptField_Constants
         eb.add(Element.createVector(rs, Element.DataType.FLOAT_32, 4), "Drop09");
         eb.add(Element.createVector(rs, Element.DataType.FLOAT_32, 4), "Drop10");
         eb.add(Element.createVector(rs, Element.DataType.FLOAT_32, 4), "Offset");
-        eb.add(Element.USER_F32(rs), "Rotate");
+        eb.add(Element.F32(rs), "Rotate");
         mElement = eb.create();
 
         init(rs, count);
