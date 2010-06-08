@@ -198,7 +198,7 @@ class GrassRS extends RenderScriptScene {
 
         final SimpleMesh.Builder meshBuilder = new SimpleMesh.Builder(mRS);
         final int vertexSlot = meshBuilder.addVertexType(mVertexBuffer.getType());
-        meshBuilder.setIndexType(Element.INDEX_16(mRS), mIndicies);
+        meshBuilder.setIndexType(Element.U16(mRS), mIndicies);
         meshBuilder.setPrimitive(Primitive.TRIANGLE);
         mBladesMesh = meshBuilder.create();
 

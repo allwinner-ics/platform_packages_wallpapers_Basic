@@ -71,7 +71,7 @@ public class ScriptC_nexus
 
 
     public void invokable_initPulses() {
-        invoke(4);
+        invoke(1);
     }
 
     public void invokable_tap(int x, int y) {

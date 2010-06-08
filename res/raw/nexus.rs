@@ -64,9 +64,10 @@ rs_allocation gTPulse;
 rs_allocation gTGlow;
 
 #pragma rs export_var(gIsPreview, gXOffset, gMode, gPFTexture, gPSBlend, gPFTexture565, gTBackground, gTPulse, gTGlow)
+#pragma rs export_func(addTap, initPulses)
 
 
-void setColor(int c) {
+static void setColor(int c) {
     if (gMode == 1) {
         // sholes red
         color(0.9f, 0.1f, 0.1f, 0.8f);
@@ -85,7 +86,7 @@ void setColor(int c) {
     }
 }
 
-void initPulse(struct pulse_s * pulse, int pulseType) {
+static void initPulse(struct pulse_s * pulse, int pulseType) {
     gWidth = rsgGetWidth();
     gHeight = rsgGetHeight();
     if (rsRand(1.f) > 0.5f) {
@@ -138,7 +139,7 @@ void initPulses() {
     }
 }
 
-void drawBackground() {
+static void drawBackground() {
     rsgBindProgramFragment(gPFTexture565);
     rsgBindTexture(gPFTexture565, 0, gTBackground);
     color(1.0f, 1.0f, 1.0f, 1.0f);
@@ -149,7 +150,7 @@ void drawBackground() {
     }
 }
 
-void drawPulses(pulse_t * pulseSet, int setSize) {
+static void drawPulses(pulse_t * pulseSet, int setSize) {
     rsgBindProgramFragment(gPFTexture);
     rsgBindProgramStore(gPSBlend);
 
