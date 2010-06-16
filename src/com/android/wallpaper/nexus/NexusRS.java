@@ -51,7 +51,7 @@ class NexusRS extends RenderScriptScene {
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
     private float mXOffset;
-    private ScriptC_nexus mScript;
+    private ScriptC_Nexus mScript;
 
     public NexusRS(int width, int height) {
         super(width, height);
@@ -80,7 +80,7 @@ class NexusRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_nexus(mRS, mResources, R.raw.nexus_bc);
+        mScript = new ScriptC_Nexus(mRS, mResources, R.raw.nexus_bc, true);
 
         createProgramFragmentStore();
         createProgramFragment();
@@ -91,7 +91,7 @@ class NexusRS extends RenderScriptScene {
         mScript.set_gTPulse(loadTextureARGB(R.drawable.pulse));
         mScript.set_gTGlow(loadTextureARGB(R.drawable.glow));
         mScript.setTimeZone(TimeZone.getDefault().getID());
-        mScript.invokable_initPulses();
+        mScript.invoke_initPulses();
         return mScript;
     }
 
@@ -180,9 +180,9 @@ class NexusRS extends RenderScriptScene {
         //     dw, bw, mWorldState.xOffset, x));
 
         if ("android.wallpaper.tap".equals(action)) {
-            mScript.invokable_tap(x, y);
+            mScript.invoke_addTap(x, y);
         } else if ("android.home.drop".equals(action)) {
-            mScript.invokable_tap(x, y);
+            mScript.invoke_addTap(x, y);
         }
         return null;
     }
