@@ -50,7 +50,7 @@ rs_allocation gTAa;
 rs_mesh gBladesMesh;
 
 
-typedef struct Blade_s {
+typedef struct Blade {
     float angle;
     int size;
     float xPos;
@@ -67,17 +67,17 @@ typedef struct Blade_s {
 } Blade_t;
 Blade_t *Blades;
 
-typedef struct Vertex_s {
-    uint32_t color;
-    float x;
-    float y;
-    float s;
-    float t;
+typedef struct RS_PACKED Vertex {
+    uchar4 color;
+    float2 position;
+    float2 texture0;
 } Vertex_t;
 Vertex_t *Verticies;
 
 
 #pragma rs export_var(gBladesCount, gIndexCount, gWidth, gHeight, gXOffset, gDawn, gMorning, gAfternoon, gDusk, gIsPreview, gPVBackground, gPFBackground, gPFGrass, gPSBackground, gTNight, gTSunset, gTSunrise, gTSky, gTAa, gBladesMesh, Blades, Verticies)
+#pragma rs export_func(updateBlades)
+
 
 #define B 0x100
 #define BM 0xff
@@ -222,7 +222,7 @@ void updateBlades()
     }
 }
 
-float time(int isPreview) {
+static float time(int isPreview) {
     if (REAL_TIME && !isPreview) {
         return (rsHour() * 3600.0f + rsMinute() * 60.0f + rsSecond()) / SECONDS_IN_DAY;
     }
@@ -230,7 +230,7 @@ float time(int isPreview) {
     return t - (int) t;
 }
 
-void alpha(float a) {
+static void alpha(float a) {
     color(1.0f, 1.0f, 1.0f, a);
 }
 
@@ -238,7 +238,7 @@ static float normf(float start, float stop, float value) {
     return (value - start) / (stop - start);
 }
 
-void drawNight(int width, int height) {
+static void drawNight(int width, int height) {
     rsgBindTexture(gPFBackground, 0, gTNight);
     rsgDrawQuadTexCoords(
             0.0f, -32.0f, 0.0f,
@@ -251,30 +251,85 @@ void drawNight(int width, int height) {
             0.0f, 0.0f);
 }
 
-void drawSunrise(int width, int height) {
+static void drawSunrise(int width, int height) {
     rsgBindTexture(gPFBackground, 0, gTSunrise);
     rsgDrawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
-void drawNoon(int width, int height) {
+static void drawNoon(int width, int height) {
     rsgBindTexture(gPFBackground, 0, gTSky);
     rsgDrawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
-void drawSunset(int width, int height) {
+static void drawSunset(int width, int height) {
     rsgBindTexture(gPFBackground, 0, gTSunset);
     rsgDrawRect(0.0f, 0.0f, width, height, 0.0f);
 }
 
-int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
+
+static uchar4 hsbToRgb(float h, float s, float b)
+{
+    float red = 0.0f;
+    float green = 0.0f;
+    float blue = 0.0f;
+
+    float x = h;
+    float y = s;
+    float z = b;
+
+    float hf = (x - (int) x) * 6.0f;
+    int ihf = (int) hf;
+    float f = hf - ihf;
+    float pv = z * (1.0f - y);
+    float qv = z * (1.0f - y * f);
+    float tv = z * (1.0f - y * (1.0f - f));
+
+    switch (ihf) {
+        case 0:         // Red is the dominant color
+            red = z;
+            green = tv;
+            blue = pv;
+            break;
+        case 1:         // Green is the dominant color
+            red = qv;
+            green = z;
+            blue = pv;
+            break;
+        case 2:
+            red = pv;
+            green = z;
+            blue = tv;
+            break;
+        case 3:         // Blue is the dominant color
+            red = pv;
+            green = qv;
+            blue = z;
+            break;
+        case 4:
+            red = tv;
+            green = pv;
+            blue = z;
+            break;
+        case 5:         // Red is the dominant color
+            red = z;
+            green = pv;
+            blue = qv;
+            break;
+    }
+
+    return rsPackColorTo8888(red, green, blue);
+}
+
+static int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
         float brightness, float xOffset, float now) {
 
     float scale = bladeStruct->scale;
     float angle = bladeStruct->angle;
     float xpos = bladeStruct->xPos + xOffset;
     int size = bladeStruct->size;
-    int color = hsbToAbgr(bladeStruct->h, bladeStruct->s,
-                          mix(0.f, bladeStruct->b, brightness), 1.0f);
+
+    uchar4 color = hsbToRgb(bladeStruct->h, bladeStruct->s,
+                            mix(0.f, bladeStruct->b, brightness));
 
     float newAngle = (turbulencef2(bladeStruct->turbulencex, now, 4.0f) - 0.5f) * 0.5f;
     angle = clamp(angle + (newAngle + bladeStruct->offset - angle) * 0.15f, -MAX_BEND, MAX_BEND);
@@ -293,16 +348,16 @@ int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
     float bottom = bottomY + HALF_TESSELATION;
 
     v[0].color = color;                          // V1.ABGR
-    v[0].x = bottomLeft;                    // V1.X
-    v[0].y = bottom;                        // V1.Y
-    v[0].s = 0.f;                           // V1.s
-    v[0].t = 0.f;                           // V1.t
+    v[0].position.x = bottomLeft;                    // V1.X
+    v[0].position.y = bottom;                        // V1.Y
+    v[0].texture0.x = 0.f;                           // V1.s
+    v[0].texture0.y = 0.f;                           // V1.t
                                                     //
     v[1].color = color;                          // V2.ABGR
-    v[1].x = bottomRight;                   // V2.X
-    v[1].y = bottom;                        // V2.Y
-    v[1].s = 1.f;                           // V2.s
-    v[1].t = 0.f;                           // V2.t
+    v[1].position.x = bottomRight;                   // V2.X
+    v[1].position.y = bottom;                        // V2.Y
+    v[1].texture0.x = 1.f;                           // V2.s
+    v[1].texture0.y = 0.f;                           // V2.t
     v += 2;
 
     for ( ; size > 0; size -= 1) {
@@ -316,16 +371,16 @@ int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
         float topRight = topX + spi;
 
         v[0].color = color;                          // V1.ABGR
-        v[0].x = topLeft;                       // V1.X
-        v[0].y = topY;                          // V1.Y
-        v[0].s = 0.f;                           // V1.s
-        v[0].t = 0.f;                           // V1.t
+        v[0].position.x = topLeft;                       // V1.X
+        v[0].position.y = topY;                          // V1.Y
+        v[0].texture0.x = 0.f;                           // V1.s
+        v[0].texture0.y = 0.f;                           // V1.t
 
         v[1].color = color;                          // V2.ABGR
-        v[1].x = topRight;                      // V2.X
-        v[1].y = topY;                          // V2.Y
-        v[1].s = 1.f;                           // V2.s
-        v[1].t = 0.f;                           // V2.t
+        v[1].position.x = topRight;                      // V2.X
+        v[1].position.y = topY;                          // V2.Y
+        v[1].texture0.x = 1.f;                           // V2.s
+        v[1].texture0.y = 0.f;                           // V2.t
 
         v += 2;
         bottomX = topX;
@@ -339,7 +394,7 @@ int drawBlade(Blade_t *bladeStruct, Vertex_t *v,
     return bladeStruct->size * 2 + 2;
 }
 
-void drawBlades(float brightness, float xOffset) {
+static void drawBlades(float brightness, float xOffset) {
     // For anti-aliasing
     rsgBindTexture(gPFGrass, 0, gTAa);
 

@@ -1,152 +1,279 @@
+/*
+ * Copyright (C) 2010 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.wallpaper.grass;
 
-import android.content.res.Resources;
 import android.renderscript.*;
+import android.content.res.Resources;
 import android.util.Log;
 
-public class ScriptC_Grass
-    extends android.renderscript.ScriptC
-{
-    private ScriptField_Blade mField_Blades;
-    private ScriptField_Vertex mField_Verticies;
-
-    public ScriptC_Grass(RenderScript rs, Resources resources, int id, boolean isRoot) {
+public class ScriptC_Grass extends ScriptC {
+    // Constructor
+    public  ScriptC_Grass(RenderScript rs, Resources resources, int id, boolean isRoot) {
         super(rs, resources, id, isRoot);
     }
 
-    public void bind_Blades(ScriptField_Blade f) {
-        mField_Blades = f;
-        if (f == null) {
-            bindAllocation(null, 20);
-        } else {
-            bindAllocation(f.getAllocation(), 20);
-        }
-    }
-    public ScriptField_Blade get_Blades() {
-        return mField_Blades;
-    }
-
-    public void bind_Verticies(ScriptField_Vertex f) {
-        mField_Verticies = f;
-        if (f == null) {
-            bindAllocation(null, 21);
-        } else {
-            bindAllocation(f.getAllocation(), 21);
-        }
-    }
-    public ScriptField_Vertex get_Verticies() {
-        return mField_Verticies;
-    }
-
-    private int mField_gBladesCount;
+    private final static int mExportVarIdx_gBladesCount = 0;
+    private int mExportVar_gBladesCount;
     public void set_gBladesCount(int v) {
-        mField_gBladesCount = v;
-        setVar(0, v);
+        mExportVar_gBladesCount = v;
+        setVar(mExportVarIdx_gBladesCount, v);
     }
-    private int mField_gIndexCount;
+
+    public int get_gBladesCount() {
+        return mExportVar_gBladesCount;
+    }
+
+    private final static int mExportVarIdx_gIndexCount = 1;
+    private int mExportVar_gIndexCount;
     public void set_gIndexCount(int v) {
-        mField_gIndexCount = v;
-        setVar(1, v);
+        mExportVar_gIndexCount = v;
+        setVar(mExportVarIdx_gIndexCount, v);
     }
-    private int mField_gWidth;
+
+    public int get_gIndexCount() {
+        return mExportVar_gIndexCount;
+    }
+
+    private final static int mExportVarIdx_gWidth = 2;
+    private int mExportVar_gWidth;
     public void set_gWidth(int v) {
-        mField_gWidth = v;
-        setVar(2, v);
+        mExportVar_gWidth = v;
+        setVar(mExportVarIdx_gWidth, v);
     }
-    private int mField_gHeight;
+
+    public int get_gWidth() {
+        return mExportVar_gWidth;
+    }
+
+    private final static int mExportVarIdx_gHeight = 3;
+    private int mExportVar_gHeight;
     public void set_gHeight(int v) {
-        mField_gHeight = v;
-        setVar(3, v);
+        mExportVar_gHeight = v;
+        setVar(mExportVarIdx_gHeight, v);
     }
 
-    private float mField_gXOffset;
+    public int get_gHeight() {
+        return mExportVar_gHeight;
+    }
+
+    private final static int mExportVarIdx_gXOffset = 4;
+    private float mExportVar_gXOffset;
     public void set_gXOffset(float v) {
-        mField_gXOffset = v;
-        setVar(4, v);
+        mExportVar_gXOffset = v;
+        setVar(mExportVarIdx_gXOffset, v);
     }
-    private float mField_gDawn;
+
+    public float get_gXOffset() {
+        return mExportVar_gXOffset;
+    }
+
+    private final static int mExportVarIdx_gDawn = 5;
+    private float mExportVar_gDawn;
     public void set_gDawn(float v) {
-        mField_gDawn = v;
-        setVar(5, v);
+        mExportVar_gDawn = v;
+        setVar(mExportVarIdx_gDawn, v);
     }
-    private float mField_gMorning;
+
+    public float get_gDawn() {
+        return mExportVar_gDawn;
+    }
+
+    private final static int mExportVarIdx_gMorning = 6;
+    private float mExportVar_gMorning;
     public void set_gMorning(float v) {
-        mField_gMorning = v;
-        setVar(6, v);
+        mExportVar_gMorning = v;
+        setVar(mExportVarIdx_gMorning, v);
     }
-    private float mField_gAfternoon;
+
+    public float get_gMorning() {
+        return mExportVar_gMorning;
+    }
+
+    private final static int mExportVarIdx_gAfternoon = 7;
+    private float mExportVar_gAfternoon;
     public void set_gAfternoon(float v) {
-        mField_gAfternoon = v;
-        setVar(7, v);
+        mExportVar_gAfternoon = v;
+        setVar(mExportVarIdx_gAfternoon, v);
     }
-    private float mField_gDusk;
+
+    public float get_gAfternoon() {
+        return mExportVar_gAfternoon;
+    }
+
+    private final static int mExportVarIdx_gDusk = 8;
+    private float mExportVar_gDusk;
     public void set_gDusk(float v) {
-        mField_gDusk = v;
-        setVar(8, v);
+        mExportVar_gDusk = v;
+        setVar(mExportVarIdx_gDusk, v);
     }
 
-    private int mField_gIsPreview;
+    public float get_gDusk() {
+        return mExportVar_gDusk;
+    }
+
+    private final static int mExportVarIdx_gIsPreview = 9;
+    private int mExportVar_gIsPreview;
     public void set_gIsPreview(int v) {
-        mField_gIsPreview = v;
-        setVar(9, v);
+        mExportVar_gIsPreview = v;
+        setVar(mExportVarIdx_gIsPreview, v);
     }
 
-    private ProgramVertex mField_gPVBackground;
+    public int get_gIsPreview() {
+        return mExportVar_gIsPreview;
+    }
+
+    private final static int mExportVarIdx_gPVBackground = 10;
+    private ProgramVertex mExportVar_gPVBackground;
     public void set_gPVBackground(ProgramVertex v) {
-        mField_gPVBackground = v;
-        setVar(10, v.getID());
+        mExportVar_gPVBackground = v;
+        setVar(mExportVarIdx_gPVBackground, (v == null) ? 0 : v.getID());
     }
-    private ProgramFragment mField_gPFBackground;
+
+    public ProgramVertex get_gPVBackground() {
+        return mExportVar_gPVBackground;
+    }
+
+    private final static int mExportVarIdx_gPFBackground = 11;
+    private ProgramFragment mExportVar_gPFBackground;
     public void set_gPFBackground(ProgramFragment v) {
-        mField_gPFBackground = v;
-        setVar(11, v.getID());
+        mExportVar_gPFBackground = v;
+        setVar(mExportVarIdx_gPFBackground, (v == null) ? 0 : v.getID());
     }
-    private ProgramFragment mField_gPFGrass;
+
+    public ProgramFragment get_gPFBackground() {
+        return mExportVar_gPFBackground;
+    }
+
+    private final static int mExportVarIdx_gPFGrass = 12;
+    private ProgramFragment mExportVar_gPFGrass;
     public void set_gPFGrass(ProgramFragment v) {
-        mField_gPFGrass = v;
-        setVar(12, v.getID());
+        mExportVar_gPFGrass = v;
+        setVar(mExportVarIdx_gPFGrass, (v == null) ? 0 : v.getID());
     }
-    private ProgramStore mField_gPSBackground;
+
+    public ProgramFragment get_gPFGrass() {
+        return mExportVar_gPFGrass;
+    }
+
+    private final static int mExportVarIdx_gPSBackground = 13;
+    private ProgramStore mExportVar_gPSBackground;
     public void set_gPSBackground(ProgramStore v) {
-        mField_gPSBackground = v;
-        setVar(13, v.getID());
+        mExportVar_gPSBackground = v;
+        setVar(mExportVarIdx_gPSBackground, (v == null) ? 0 : v.getID());
     }
 
-    private Allocation mField_gTNight;
+    public ProgramStore get_gPSBackground() {
+        return mExportVar_gPSBackground;
+    }
+
+    private final static int mExportVarIdx_gTNight = 14;
+    private Allocation mExportVar_gTNight;
     public void set_gTNight(Allocation v) {
-        mField_gTNight = v;
-        setVar(14, v.getID());
+        mExportVar_gTNight = v;
+        setVar(mExportVarIdx_gTNight, (v == null) ? 0 : v.getID());
     }
-    private Allocation mField_gTSunset;
+
+    public Allocation get_gTNight() {
+        return mExportVar_gTNight;
+    }
+
+    private final static int mExportVarIdx_gTSunset = 15;
+    private Allocation mExportVar_gTSunset;
     public void set_gTSunset(Allocation v) {
-        mField_gTSunset = v;
-        setVar(15, v.getID());
+        mExportVar_gTSunset = v;
+        setVar(mExportVarIdx_gTSunset, (v == null) ? 0 : v.getID());
     }
-    private Allocation mField_gTSunrise;
+
+    public Allocation get_gTSunset() {
+        return mExportVar_gTSunset;
+    }
+
+    private final static int mExportVarIdx_gTSunrise = 16;
+    private Allocation mExportVar_gTSunrise;
     public void set_gTSunrise(Allocation v) {
-        mField_gTSunrise = v;
-        setVar(16, v.getID());
+        mExportVar_gTSunrise = v;
+        setVar(mExportVarIdx_gTSunrise, (v == null) ? 0 : v.getID());
     }
-    private Allocation mField_gTSky;
+
+    public Allocation get_gTSunrise() {
+        return mExportVar_gTSunrise;
+    }
+
+    private final static int mExportVarIdx_gTSky = 17;
+    private Allocation mExportVar_gTSky;
     public void set_gTSky(Allocation v) {
-        mField_gTSky = v;
-        setVar(17, v.getID());
+        mExportVar_gTSky = v;
+        setVar(mExportVarIdx_gTSky, (v == null) ? 0 : v.getID());
     }
-    private Allocation mField_gTAa;
+
+    public Allocation get_gTSky() {
+        return mExportVar_gTSky;
+    }
+
+    private final static int mExportVarIdx_gTAa = 18;
+    private Allocation mExportVar_gTAa;
     public void set_gTAa(Allocation v) {
-        mField_gTAa = v;
-        setVar(18, v.getID());
+        mExportVar_gTAa = v;
+        setVar(mExportVarIdx_gTAa, (v == null) ? 0 : v.getID());
     }
-    private SimpleMesh mField_gBladesMesh;
+
+    public Allocation get_gTAa() {
+        return mExportVar_gTAa;
+    }
+
+    private final static int mExportVarIdx_gBladesMesh = 19;
+    private SimpleMesh mExportVar_gBladesMesh;
     public void set_gBladesMesh(SimpleMesh v) {
-        mField_gBladesMesh = v;
-        setVar(19, v.getID());
+        mExportVar_gBladesMesh = v;
+        setVar(mExportVarIdx_gBladesMesh, (v == null) ? 0 : v.getID());
     }
 
-
-    public void invokable_updateBlades() {
-        invoke(1);
+    public SimpleMesh get_gBladesMesh() {
+        return mExportVar_gBladesMesh;
     }
+
+    private final static int mExportVarIdx_Blades = 20;
+    private ScriptField_Blade mExportVar_Blades;
+    public void bind_Blades(ScriptField_Blade v) {
+        mExportVar_Blades = v;
+        if(v == null) bindAllocation(null, mExportVarIdx_Blades);
+        else bindAllocation(v.getAllocation(), mExportVarIdx_Blades);
+    }
+
+    public ScriptField_Blade get_Blades() {
+        return mExportVar_Blades;
+    }
+
+    private final static int mExportVarIdx_Verticies = 21;
+    private ScriptField_Vertex mExportVar_Verticies;
+    public void bind_Verticies(ScriptField_Vertex v) {
+        mExportVar_Verticies = v;
+        if(v == null) bindAllocation(null, mExportVarIdx_Verticies);
+        else bindAllocation(v.getAllocation(), mExportVarIdx_Verticies);
+    }
+
+    public ScriptField_Vertex get_Verticies() {
+        return mExportVar_Verticies;
+    }
+
+    private final static int mExportFuncIdx_updateBlades = 0;
+    public void invoke_updateBlades() {
+        invoke(mExportFuncIdx_updateBlades);
+    }
+
 }
 

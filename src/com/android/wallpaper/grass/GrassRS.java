@@ -131,7 +131,7 @@ class GrassRS extends RenderScriptScene {
 
         mScript.set_gWidth(width);
         mScript.set_gHeight(height);
-        mScript.invokable_updateBlades();
+        mScript.invoke_updateBlades();
         mPvOrthoAlloc.setupOrthoWindow(width, height);
     }
 
