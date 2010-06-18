@@ -49,10 +49,9 @@ rs_allocation gTFlares;
 rs_allocation gTLight1;
 rs_mesh gParticlesMesh;
 
-typedef struct __attribute__((packed, aligned(4))) Particle_s {
-    uint32_t color;
-    //float3 position;
-    float x, y, z;
+typedef struct __attribute__((packed, aligned(4))) Particle {
+    uchar4 color;
+    float3 position;
 } Particle_t;
 Particle_t *Particles;
 
@@ -90,19 +89,17 @@ static void createParticle(Particle_t *part, int idx, float scale) {
     float z = randomGauss() * 0.4f * (1.0f - id);
     float p = -d * ELLIPSE_TWIST;
 
-    int r,g,b,a;
     if (d < gGalaxyRadius * 0.33f) {
-        r = (int) (220 + id * 35);
-        g = 220;
-        b = 220;
+        part->color.x = (uchar) (220 + id * 35);
+        part->color.y = 220;
+        part->color.z = 220;
     } else {
-        r = 180;
-        g = 180;
-        b = (int) clamp(140.f + id * 115.f, 140.f, 255.f);
+        part->color.x = 180;
+        part->color.y = 180;
+        part->color.z = (uchar) clamp(140.f + id * 115.f, 140.f, 255.f);
     }
     // Stash point size * 10 in Alpha
-    a = (int) (rsRand(1.2f, 2.1f) * 60);
-    part->color = r | g<<8 | b<<16 | a<<24;
+    part->color.w = (uchar) (rsRand(1.2f, 2.1f) * 60);
 
     if (d > gGalaxyRadius * 0.15f) {
         z *= 0.6f * (1.0f - id);
@@ -113,11 +110,11 @@ static void createParticle(Particle_t *part, int idx, float scale) {
     // Map to the projection coordinates (viewport.x = -1.0 -> 1.0)
     d = mapf(-4.0f, gGalaxyRadius + 4.0f, 0.0f, scale, d);
 
-    part->/*position.*/x = rsRand(TWO_PI);
-    part->/*position.*/y = d;
+    part->position.x = rsRand(TWO_PI);
+    part->position.y = d;
     gSpeed[idx] = rsRand(0.0015f, 0.0025f) * (0.5f + (scale / d)) * 0.8f;
 
-    part->/*position.*/z = z / 5.0f;
+    part->position.z = z / 5.0f;
 }
 
 /**
@@ -184,13 +181,10 @@ static void drawParticles(float offset) {
     rsMatrixRotate(&matrix, a, 0.0f, 0.4f, 0.1f);
     rsgProgramVertexLoadModelMatrix(&matrix);
 
-    // quadratic attenuation
-    //pointAttenuation(0.1f + 0.3f * fabs(offset), 0.0f, 0.06f  + 0.1f *  fabs(offset));
-
     Particle_t *vtx = Particles;
     int count = rsAllocationGetDimX(gParticlesBuffer);
     for (int i = 0; i < count; i++) {
-        vtx->/*position.*/x = vtx->/*position.*/x + gSpeed[i];
+        vtx->position.x = vtx->position.x + gSpeed[i];
         vtx++;
     }
 
