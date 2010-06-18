@@ -135,7 +135,7 @@ class FallRS extends RenderScriptScene {
         mScript.set_g_glHeight(mWorldState.height);
         mScript.set_g_rotate(mWorldState.rotate);
 
-        mScript.invokable_initLeaves();
+        mScript.invoke_initLeaves();
 
         mPvOrthoAlloc.setupProjectionNormalized(mWidth, mHeight);
     }
@@ -153,7 +153,7 @@ class FallRS extends RenderScriptScene {
 
         mScript.setTimeZone(TimeZone.getDefault().getID());
 
-        mScript.bind_Constants(mConstants);
+        mScript.bind_g_Constants(mConstants);
 
         return mScript;
     }

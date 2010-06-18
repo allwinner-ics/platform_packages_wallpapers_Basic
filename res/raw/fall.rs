@@ -14,6 +14,8 @@
 
 #pragma version(1)
 
+#pragma rs java_package_name(com.android.wallpaper.fall)
+
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_types.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
@@ -45,7 +47,7 @@ rs_allocation g_TRiverbed;
 
 rs_mesh g_WaterMesh;
 
-typedef struct Constants_s {
+typedef struct Constants {
     float4 Drop01;
     float4 Drop02;
     float4 Drop03;
@@ -68,7 +70,7 @@ rs_program_store g_PFSBackground;
 float g_DT;
 int64_t g_LastTime;
 
-typedef struct Drop_s {
+typedef struct Drop {
     float ampS;
     float ampE;
     float spread;
@@ -78,7 +80,7 @@ typedef struct Drop_s {
 static Drop_t gDrops[10];
 int gMaxDrops;
 
-typedef struct Leaves_s {
+typedef struct Leaves {
     float x;
     float y;
     float scale;
@@ -98,9 +100,10 @@ static Leaves_t* gLeaves[LEAVES_COUNT];
 static Leaves_t* gNextLeaves[LEAVES_COUNT];
 
 #pragma rs export_var(g_glWidth, g_glHeight, g_meshWidth, g_meshHeight, g_xOffset, g_rotate, g_newDropX, g_newDropY, g_PVWater, g_PVSky, g_PFSky, g_PFSLeaf, g_PFBackground, g_TLeaves, g_TRiverbed, g_WaterMesh, g_Constants, g_PFSBackground)
+#pragma rs export_func(initLeaves)
 
 void initLeaves() {
-    struct Leaves_s *leaf = gLeavesStore;
+    Leaves_t *leaf = gLeavesStore;
     // globals haven't been set at this point yet. We need to find the correct
     // function index to call this, we can wait until reflection works
     float width = 2; //g_glWidth;
@@ -164,7 +167,7 @@ void drop(int x, int y, float s) {
 void generateRipples() {
     int ct;
     for (ct = 0; ct < gMaxDrops; ct++) {
-        struct Drop_s * d = &gDrops[ct];
+        Drop_t * d = &gDrops[ct];
         float *v = (float*)&g_Constants->Drop01;
         v += ct*4;
         *(v++) = d->x;
@@ -179,13 +182,13 @@ void generateRipples() {
     }
 }
 
-void genLeafDrop(struct Leaves_s *leaf, float amp) {
+void genLeafDrop(Leaves_t *leaf, float amp) {
     float nx = (leaf->x + g_glWidth * 0.5f) / g_glWidth;
     float ny = (leaf->y + g_glHeight * 0.5f) / g_glHeight;
     drop(nx * g_meshWidth, g_meshHeight - ny * g_meshHeight, amp);
 }
 
-int drawLeaf(struct Leaves_s *leaf) {
+int drawLeaf(Leaves_t *leaf) {
 
     float x = leaf->x;
     float y = leaf->y;
