@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #pragma version(1)
+
+#pragma rs java_package_name(com.android.wallpaper.grass)
+
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_types.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
@@ -71,7 +74,7 @@ typedef struct RS_PACKED Vertex {
     uchar4 color;
     float2 position;
     float2 texture0;
-} Vertex_t;
+} __attribute__((packed,aligned(4))) Vertex_t;
 Vertex_t *Verticies;
 
 

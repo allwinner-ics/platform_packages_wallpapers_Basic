@@ -14,6 +14,8 @@
 
 #pragma version(1)
 
+#pragma rs java_package_name(com.android.wallpaper.galaxy)
+
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_types.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_math.rsh"
 #include "../../../../../frameworks/base/libs/rs/scriptc/rs_graphics.rsh"
@@ -57,6 +59,7 @@ Particle_t *Particles;
 
 
 #pragma rs export_var(gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPSLights, gTSpace, gTFlares, gTLight1, gParticlesMesh, Particles)
+#pragma rs export_func()
 
 static float mapf(float minStart, float minStop, float maxStart, float maxStop, float value) {
     return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
