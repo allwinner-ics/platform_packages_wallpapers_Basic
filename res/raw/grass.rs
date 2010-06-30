@@ -411,7 +411,6 @@ static void drawBlades(float brightness, float xOffset) {
         bladeStruct ++;
     }
 
-    rsgUploadToBufferObject(rsGetAllocation(Verticies));
     rsgDrawSimpleMesh(gBladesMesh, 0, gIndexCount);
 }
 

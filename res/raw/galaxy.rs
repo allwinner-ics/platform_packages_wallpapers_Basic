@@ -191,7 +191,6 @@ static void drawParticles(float offset) {
         vtx++;
     }
 
-    rsgUploadToBufferObject(gParticlesBuffer);
     rsgDrawSimpleMesh(gParticlesMesh);
 }
 

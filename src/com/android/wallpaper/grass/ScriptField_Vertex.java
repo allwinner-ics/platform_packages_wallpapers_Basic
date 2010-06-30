@@ -38,17 +38,18 @@ public class ScriptField_Vertex extends android.renderscript.Script.FieldBase {
 
     private Item mItemArray[];
     private FieldPacker mIOBuffer;
+    public static Element createElement(RenderScript rs) {
+        Element.Builder eb = new Element.Builder(rs);
+        eb.add(Element.createVector(rs, Element.DataType.UNSIGNED_8, 4), "color");
+        eb.add(Element.createVector(rs, Element.DataType.FLOAT_32, 2), "position");
+        eb.add(Element.createVector(rs, Element.DataType.FLOAT_32, 2), "texture0");
+        return eb.create();
+    }
+
     public  ScriptField_Vertex(RenderScript rs, int count) {
         mItemArray = null;
         mIOBuffer = null;
-        {
-            Element.Builder eb = new Element.Builder(rs);
-            eb.add(Element.createVector(rs, Element.DataType.UNSIGNED_8, 4), "color");
-            eb.add(Element.createVector(rs, Element.DataType.FLOAT_32, 2), "position");
-            eb.add(Element.createVector(rs, Element.DataType.FLOAT_32, 2), "texture0");
-            mElement = eb.create();
-        }
-
+        mElement = createElement(rs);
         init(rs, count);
     }
 
@@ -65,7 +66,7 @@ public class ScriptField_Vertex extends android.renderscript.Script.FieldBase {
         mItemArray[index] = i;
         if (copyNow)  {
             copyToArray(i, index);
-            mAllocation.subData1D(index * Item.sizeof, Item.sizeof, mIOBuffer.getData());
+            mAllocation.subData1D(index, 1, mIOBuffer.getData());
         }
 
     }
