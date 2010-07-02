@@ -30,7 +30,7 @@ import android.renderscript.ScriptC;
 import android.renderscript.Type;
 import android.renderscript.Dimension;
 import android.renderscript.Element;
-import android.renderscript.SimpleMesh;
+import android.renderscript.Mesh;
 import android.renderscript.Primitive;
 import static android.renderscript.Sampler.Value.*;
 import android.content.Context;
@@ -65,7 +65,7 @@ class GrassRS extends RenderScriptScene {
 
     //private Allocation mBladesBuffer;
     private Allocation mBladesIndicies;
-    private SimpleMesh mBladesMesh;
+    private Mesh mBladesMesh;
 
     private ScriptC_Grass mScript;
 
@@ -196,16 +196,13 @@ class GrassRS extends RenderScriptScene {
     private void createMesh() {
         mVertexBuffer = new ScriptField_Vertex(mRS, mVerticies * 2);
 
-        final SimpleMesh.Builder meshBuilder = new SimpleMesh.Builder(mRS);
-        final int vertexSlot = meshBuilder.addVertexType(mVertexBuffer.getType());
-        meshBuilder.setIndexType(Element.U16(mRS), mIndicies);
-        meshBuilder.setPrimitive(Primitive.TRIANGLE);
-        mBladesMesh = meshBuilder.create();
+        final Mesh.AllocationBuilder meshBuilder = new Mesh.AllocationBuilder(mRS);
+        meshBuilder.addVertexAllocation(mVertexBuffer.getAllocation());
 
-        //mBladesBuffer = mBladesMesh.createVertexAllocation(vertexSlot);
-        mBladesMesh.bindVertexAllocation(mVertexBuffer.getAllocation(), 0);
-        mBladesIndicies = mBladesMesh.createIndexAllocation();
-        mBladesMesh.bindIndexAllocation(mBladesIndicies);
+        mBladesIndicies = Allocation.createSized(mRS, Element.U16(mRS), mIndicies);
+        meshBuilder.addIndexAllocation(mBladesIndicies, Primitive.TRIANGLE);
+
+        mBladesMesh = meshBuilder.create();
 
         short[] idx = new short[mIndicies];
         int idxIdx = 0;

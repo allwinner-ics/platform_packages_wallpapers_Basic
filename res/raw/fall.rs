@@ -350,7 +350,7 @@ void drawRiverbed() {
     rsgBindProgramFragment(g_PFBackground);
     rsgBindProgramStore(g_PFSBackground);
     rsgBindTexture(g_PFBackground, 0, g_TRiverbed);
-    rsgDrawSimpleMesh(g_WaterMesh);
+    rsgDrawMesh(g_WaterMesh);
 }
 
 int root(int launchID) {

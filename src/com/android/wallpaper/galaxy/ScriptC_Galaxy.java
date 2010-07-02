@@ -137,13 +137,13 @@ public class ScriptC_Galaxy extends ScriptC {
     }
 
     private final static int mExportVarIdx_gParticlesMesh = 10;
-    private SimpleMesh mExportVar_gParticlesMesh;
-    public void set_gParticlesMesh(SimpleMesh v) {
+    private Mesh mExportVar_gParticlesMesh;
+    public void set_gParticlesMesh(Mesh v) {
         mExportVar_gParticlesMesh = v;
         setVar(mExportVarIdx_gParticlesMesh, (v == null) ? 0 : v.getID());
     }
 
-    public SimpleMesh get_gParticlesMesh() {
+    public Mesh get_gParticlesMesh() {
         return mExportVar_gParticlesMesh;
     }
 

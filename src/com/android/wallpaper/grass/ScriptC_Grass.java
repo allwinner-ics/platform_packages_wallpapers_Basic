@@ -236,13 +236,13 @@ public class ScriptC_Grass extends ScriptC {
     }
 
     private final static int mExportVarIdx_gBladesMesh = 19;
-    private SimpleMesh mExportVar_gBladesMesh;
-    public void set_gBladesMesh(SimpleMesh v) {
+    private Mesh mExportVar_gBladesMesh;
+    public void set_gBladesMesh(Mesh v) {
         mExportVar_gBladesMesh = v;
         setVar(mExportVarIdx_gBladesMesh, (v == null) ? 0 : v.getID());
     }
 
-    public SimpleMesh get_gBladesMesh() {
+    public Mesh get_gBladesMesh() {
         return mExportVar_gBladesMesh;
     }
 

@@ -24,7 +24,7 @@ import android.renderscript.ProgramRaster;
 import android.renderscript.Allocation;
 import android.renderscript.Sampler;
 import android.renderscript.Element;
-import android.renderscript.SimpleMesh;
+import android.renderscript.Mesh;
 import android.renderscript.Primitive;
 import android.renderscript.Type;
 import static android.renderscript.ProgramStore.DepthFunc.*;
@@ -44,7 +44,7 @@ class GalaxyRS extends RenderScriptScene {
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
     private ProgramVertex.MatrixAllocation mPvProjectionAlloc;
-    private SimpleMesh mParticlesMesh;
+    private Mesh mParticlesMesh;
     private ScriptC_Galaxy mScript;
 
     GalaxyRS(int width, int height) {
@@ -77,14 +77,13 @@ class GalaxyRS extends RenderScriptScene {
     private void createParticlesMesh() {
         ScriptField_Particle p = new ScriptField_Particle(mRS, PARTICLES_COUNT);
 
-        final SimpleMesh.Builder meshBuilder = new SimpleMesh.Builder(mRS);
-        final int vertexSlot = meshBuilder.addVertexType(p.getType());
-        meshBuilder.setPrimitive(Primitive.POINT);
+        final Mesh.AllocationBuilder meshBuilder = new Mesh.AllocationBuilder(mRS);
+        final int vertexSlot = meshBuilder.addVertexAllocation(p.getAllocation());
+        meshBuilder.addIndexType(Primitive.POINT);
         mParticlesMesh = meshBuilder.create();
 
         mScript.set_gParticlesMesh(mParticlesMesh);
         mScript.bind_Particles(p);
-        mParticlesMesh.bindVertexAllocation(p.getAllocation(), 0);
     }
 
     @Override
@@ -184,7 +183,7 @@ class GalaxyRS extends RenderScriptScene {
                     "  varColor.a = 1.0;\n" +
                     "}\n";
         sb.setShader(t);
-        sb.addInput(mParticlesMesh.getVertexType(0).getElement());
+        sb.addInput(mParticlesMesh.getVertexAllocation(0).getType().getElement());
         ProgramVertex pvs = sb.create();
         pvs.bindAllocation(mPvProjectionAlloc);
         mScript.set_gPVStars(pvs);

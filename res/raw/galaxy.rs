@@ -191,7 +191,7 @@ static void drawParticles(float offset) {
         vtx++;
     }
 
-    rsgDrawSimpleMesh(gParticlesMesh);
+    rsgDrawMesh(gParticlesMesh);
 }
 
 int root() {

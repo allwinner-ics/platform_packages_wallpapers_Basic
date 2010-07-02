@@ -192,13 +192,13 @@ public class ScriptC_Fall extends ScriptC {
     }
 
     private final static int mExportVarIdx_g_WaterMesh = 15;
-    private SimpleMesh mExportVar_g_WaterMesh;
-    public void set_g_WaterMesh(SimpleMesh v) {
+    private Mesh mExportVar_g_WaterMesh;
+    public void set_g_WaterMesh(Mesh v) {
         mExportVar_g_WaterMesh = v;
         setVar(mExportVarIdx_g_WaterMesh, (v == null) ? 0 : v.getID());
     }
 
-    public SimpleMesh get_g_WaterMesh() {
+    public Mesh get_g_WaterMesh() {
         return mExportVar_g_WaterMesh;
     }
 

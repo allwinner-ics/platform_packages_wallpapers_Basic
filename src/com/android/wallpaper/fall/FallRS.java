@@ -25,7 +25,7 @@ import android.renderscript.ProgramVertex;
 import android.renderscript.Allocation;
 import android.renderscript.Sampler;
 import android.renderscript.Type;
-import android.renderscript.SimpleMesh;
+import android.renderscript.Mesh;
 import android.renderscript.Script;
 import static android.renderscript.Sampler.Value.LINEAR;
 import static android.renderscript.Sampler.Value.CLAMP;
@@ -80,7 +80,7 @@ class FallRS extends RenderScriptScene {
 
     private int mMeshHeight;
     @SuppressWarnings({"FieldCanBeLocal"})
-    private SimpleMesh mMesh;
+    private Mesh mMesh;
     private WorldState mWorldState;
 
     private ScriptC_Fall mScript;
@@ -159,7 +159,7 @@ class FallRS extends RenderScriptScene {
     }
 
     private void createMesh() {
-        SimpleMesh.TriangleMeshBuilder tmb = new SimpleMesh.TriangleMeshBuilder(mRS, 2, 0);
+        Mesh.TriangleMeshBuilder tmb = new Mesh.TriangleMeshBuilder(mRS, 2, 0);
 
         final int width = mWidth > mHeight ? mHeight : mWidth;
         final int height = mWidth > mHeight ? mWidth : mHeight;
@@ -195,7 +195,7 @@ class FallRS extends RenderScriptScene {
             }
         }
 
-        mMesh = tmb.create();
+        mMesh = tmb.create(true);
 
         mMeshWidth = wResolution + 1;
         mMeshHeight = hResolution + 1;
@@ -371,7 +371,7 @@ class FallRS extends RenderScriptScene {
 
         sb.setShader(t);
         sb.addConstant(mUniformAlloc.getType());
-        sb.addInput(mMesh.getVertexType(0).getElement());
+        sb.addInput(mMesh.getVertexAllocation(0).getType().getElement());
         mPvWater = sb.create();
         mPvWater.bindAllocation(mPvOrthoAlloc);
         mPvWater.bindConstants(mUniformAlloc, 1);

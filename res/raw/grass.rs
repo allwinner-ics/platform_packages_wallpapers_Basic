@@ -411,7 +411,7 @@ static void drawBlades(float brightness, float xOffset) {
         bladeStruct ++;
     }
 
-    rsgDrawSimpleMesh(gBladesMesh, 0, gIndexCount);
+    rsgDrawMesh(gBladesMesh, 0, 0, gIndexCount);
 }
 
 int root(int launchID) {
