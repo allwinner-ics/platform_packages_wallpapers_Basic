@@ -246,12 +246,12 @@ static void drawNight(int width, int height) {
     rsgDrawQuadTexCoords(
             0.0f, -32.0f, 0.0f,
             0.0f, 1.0f,
-            width, -32.0f, 0.0f,
-            2.0f, 1.0f,
+            0.0f, 1024.0f - 32.0f, 0.0f,
+            0.0f, 0.0f,
             width, 1024.0f - 32.0f, 0.0f,
             2.0f, 0.0f,
-            0.0f, 1024.0f - 32.0f, 0.0f,
-            0.0f, 0.0f);
+            width, -32.0f, 0.0f,
+            2.0f, 1.0f);
 }
 
 static void drawSunrise(int width, int height) {

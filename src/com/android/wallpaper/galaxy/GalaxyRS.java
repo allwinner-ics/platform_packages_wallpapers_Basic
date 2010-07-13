@@ -190,7 +190,7 @@ class GalaxyRS extends RenderScriptScene {
     }
 
     private void createProgramRaster() {
-        ProgramRaster.Builder b = new ProgramRaster.Builder(mRS, null, null);
+        ProgramRaster.Builder b = new ProgramRaster.Builder(mRS);
         b.setPointSmoothEnable(true);
         b.setPointSpriteEnable(true);
         ProgramRaster pr = b.create();
