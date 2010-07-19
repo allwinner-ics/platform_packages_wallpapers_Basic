@@ -80,7 +80,7 @@ class NexusRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_Nexus(mRS, mResources, R.raw.nexus_bc, true);
+        mScript = new ScriptC_Nexus(mRS, mResources, R.raw.nexus, true);
 
         createProgramFragmentStore();
         createProgramFragment();

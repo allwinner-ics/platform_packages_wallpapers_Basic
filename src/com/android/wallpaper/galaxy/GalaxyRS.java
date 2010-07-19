@@ -56,7 +56,7 @@ class GalaxyRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_Galaxy(mRS, mResources, R.raw.galaxy_bc, true);
+        mScript = new ScriptC_Galaxy(mRS, mResources, R.raw.galaxy, true);
         mScript.set_gIsPreview(isPreview() ? 1 : 0);
         if (isPreview()) {
             mScript.set_gXOffset(0.5f);

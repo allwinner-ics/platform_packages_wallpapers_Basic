@@ -137,7 +137,7 @@ class GrassRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_Grass(mRS, mResources, R.raw.grass_bc, true);
+        mScript = new ScriptC_Grass(mRS, mResources, R.raw.grass, true);
 
         final boolean isPreview = isPreview();
         createProgramVertex();
