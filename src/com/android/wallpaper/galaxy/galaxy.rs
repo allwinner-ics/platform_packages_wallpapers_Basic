@@ -16,8 +16,6 @@
 
 #pragma rs java_package_name(com.android.wallpaper.galaxy)
 
-#include "rs_types.rsh"
-#include "rs_math.rsh"
 #include "rs_graphics.rsh"
 
 #pragma stateVertex(parent);

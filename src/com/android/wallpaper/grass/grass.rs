@@ -16,10 +16,7 @@
 
 #pragma rs java_package_name(com.android.wallpaper.grass)
 
-#include "rs_types.rsh"
-#include "rs_math.rsh"
 #include "rs_graphics.rsh"
-
 
 #define RSID_BLADES_BUFFER 2
 

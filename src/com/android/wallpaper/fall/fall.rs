@@ -16,8 +16,6 @@
 
 #pragma rs java_package_name(com.android.wallpaper.fall)
 
-#include "rs_types.rsh"
-#include "rs_math.rsh"
 #include "rs_graphics.rsh"
 
 #define LEAVES_TEXTURES_COUNT 8
