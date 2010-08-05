@@ -296,6 +296,7 @@ class GrassRS extends RenderScriptScene {
         ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
         builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
                            ProgramFragment.Builder.Format.ALPHA, 0);
+        builder.setVaryingColor(true);
         ProgramFragment pf = builder.create();
         mScript.set_gPFGrass(pf);
         pf.bindSampler(sl, 0);

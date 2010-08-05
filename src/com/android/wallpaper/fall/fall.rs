@@ -209,7 +209,7 @@ int drawLeaf(Leaves_t *leaf) {
         float alpha = 1.0f;
         if (a >= 0.4f) alpha = 1.0f - (a - 0.4f) / 0.1f;
 
-        color(0.0f, 0.0f, 0.0f, alpha * 0.15f);
+        rsgProgramFragmentConstantColor(g_PFSky, 0.0f, 0.0f, 0.0f, alpha * 0.15f);
 
         rsMatrixLoadIdentity(&matrix);
         if (!g_rotate) {
@@ -230,9 +230,9 @@ int drawLeaf(Leaves_t *leaf) {
                            LEAF_SIZE,  LEAF_SIZE, 0, u2, 0.0f,
                           -LEAF_SIZE,  LEAF_SIZE, 0, u1, 0.0f);
 
-        color(1.0f, 1.0f, 1.0f, alpha);
+        rsgProgramFragmentConstantColor(g_PFSky, 1.0f, 1.0f, 1.0f, alpha);
     } else {
-        color(1.0f, 1.0f, 1.0f, 1.0f);
+        rsgProgramFragmentConstantColor(g_PFSky, 1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     rsMatrixLoadIdentity(&matrix);
@@ -301,8 +301,6 @@ void drawLeaves() {
     rsgBindProgramStore(g_PFSLeaf);
     rsgBindProgramVertex(g_PVSky);
     rsgBindTexture(g_PFSky, 0, g_TLeaves);
-
-    color(1.0f, 1.0f, 1.0f, 1.0f);
 
     int newLeaves = 0;
     int i = 0;

@@ -132,6 +132,7 @@ class GalaxyRS extends RenderScriptScene {
         builder.setPointSpriteTexCoordinateReplacement(true);
         builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
                            ProgramFragment.Builder.Format.RGBA, 0);
+        builder.setVaryingColor(true);
         ProgramFragment pfs = builder.create();
         pfs.bindSampler(Sampler.WRAP_LINEAR(mRS), 0);
         mScript.set_gPFStars(pfs);

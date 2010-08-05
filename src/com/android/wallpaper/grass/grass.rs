@@ -231,7 +231,7 @@ static float time(int isPreview) {
 }
 
 static void alpha(float a) {
-    color(1.0f, 1.0f, 1.0f, a);
+    rsgProgramFragmentConstantColor(gPFBackground, 1.0f, 1.0f, 1.0f, a);
 }
 
 static float normf(float start, float stop, float value) {
@@ -415,11 +415,11 @@ int root(int launchID) {
     float x = mix((float)gWidth, 0.f, gXOffset);
 
     float now = time(gIsPreview);
-    alpha(1.0f);
 
     rsgBindProgramVertex(gPVBackground);
     rsgBindProgramFragment(gPFBackground);
     rsgBindProgramStore(gPSBackground);
+    alpha(1.0f);
 
     float newB = 1.0f;
     if (now >= 0.0f && now < gDawn) {                    // Draw night
