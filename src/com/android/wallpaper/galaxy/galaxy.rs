@@ -55,8 +55,13 @@ typedef struct __attribute__((packed, aligned(4))) Particle {
 } Particle_t;
 Particle_t *Particles;
 
+typedef struct VpConsts {
+    rs_matrix4x4 Proj;
+    rs_matrix4x4 MVP;
+} VpConsts_t;
+VpConsts_t *vpConstants;
 
-#pragma rs export_var(gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPSLights, gTSpace, gTFlares, gTLight1, gParticlesMesh, Particles)
+#pragma rs export_var(gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPSLights, gTSpace, gTFlares, gTLight1, gParticlesMesh, Particles, vpConstants)
 #pragma rs export_func()
 
 static float mapf(float minStart, float minStop, float maxStart, float maxStop, float value) {
@@ -163,11 +168,6 @@ static void drawLights() {
 }
 
 static void drawParticles(float offset) {
-    rsgBindProgramVertex(gPVStars);
-    rsgBindProgramFragment(gPFStars);
-    rsgBindProgramStore(gPSLights);
-    rsgBindTexture(gPFStars, 0, gTFlares);
-
     float a = offset * angle;
     float absoluteAngle = fabs(a);
 
@@ -180,7 +180,14 @@ static void drawParticles(float offset) {
     }
     rsMatrixRotate(&matrix, absoluteAngle, 1.0f, 0.0f, 0.0f);
     rsMatrixRotate(&matrix, a, 0.0f, 0.4f, 0.1f);
-    rsgProgramVertexLoadModelMatrix(&matrix);
+    rsMatrixLoad(&vpConstants->MVP, &vpConstants->Proj);
+    rsMatrixMultiply(&vpConstants->MVP, &matrix);
+    rsAllocationMarkDirty(rsGetAllocation(vpConstants));
+
+    rsgBindProgramVertex(gPVStars);
+    rsgBindProgramFragment(gPFStars);
+    rsgBindProgramStore(gPSLights);
+    rsgBindTexture(gPFStars, 0, gTFlares);
 
     Particle_t *vtx = Particles;
     int count = rsAllocationGetDimX(gParticlesBuffer);

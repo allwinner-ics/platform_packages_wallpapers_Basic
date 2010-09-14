@@ -25,6 +25,7 @@ import android.renderscript.Allocation;
 import android.renderscript.Sampler;
 import android.renderscript.Element;
 import android.renderscript.Mesh;
+import android.renderscript.Matrix4f;
 import android.renderscript.Primitive;
 import android.renderscript.Type;
 import static android.renderscript.ProgramStore.DepthFunc.*;
@@ -44,6 +45,7 @@ class GalaxyRS extends RenderScriptScene {
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
     private ProgramVertex.MatrixAllocation mPvProjectionAlloc;
+    private ScriptField_VpConsts mPvStarAlloc;
     private Mesh mParticlesMesh;
     private ScriptC_Galaxy mScript;
 
@@ -86,6 +88,41 @@ class GalaxyRS extends RenderScriptScene {
         mScript.bind_Particles(p);
     }
 
+    private Matrix4f getProjectionNormalized(int w, int h) {
+        // range -1,1 in the narrow axis at z = 0.
+        Matrix4f m1 = new Matrix4f();
+        Matrix4f m2 = new Matrix4f();
+
+        if(w > h) {
+            float aspect = ((float)w) / h;
+            m1.loadFrustum(-aspect,aspect,  -1,1,  1,100);
+        } else {
+            float aspect = ((float)h) / w;
+            m1.loadFrustum(-1,1, -aspect,aspect, 1,100);
+        }
+
+        m2.loadRotate(180, 0, 1, 0);
+        m1.loadMultiply(m1, m2);
+
+        m2.loadScale(-2, 2, 1);
+        m1.loadMultiply(m1, m2);
+
+        m2.loadTranslate(0, 0, 2);
+        m1.loadMultiply(m1, m2);
+        return m1;
+    }
+
+    private void updateProjectionMatrices() {
+        mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
+
+        Matrix4f projNorm = getProjectionNormalized(mWidth, mHeight);
+        ScriptField_VpConsts.Item i = new ScriptField_VpConsts.Item();
+        i.Proj = projNorm;
+        i.MVP = projNorm;
+        mPvStarAlloc.set(i, 0, true);
+        mPvProjectionAlloc.loadProjection(projNorm);
+    }
+
     @Override
     public void setOffset(float xOffset, float yOffset, int xPixels, int yPixels) {
         mScript.set_gXOffset(xOffset);
@@ -95,8 +132,7 @@ class GalaxyRS extends RenderScriptScene {
     public void resize(int width, int height) {
         super.resize(width, height);
 
-        mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
-        mPvProjectionAlloc.setupProjectionNormalized(mWidth, mHeight);
+        updateProjectionMatrices();
     }
 
     private void loadTextures() {
@@ -149,15 +185,16 @@ class GalaxyRS extends RenderScriptScene {
 
     private void createProgramVertex() {
         mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
-        mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
 
         ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
         ProgramVertex pvbo = builder.create();
         pvbo.bindAllocation(mPvOrthoAlloc);
         mRS.contextBindProgramVertex(pvbo);
 
+        mPvStarAlloc = new ScriptField_VpConsts(mRS, 1);
+        mScript.bind_vpConstants(mPvStarAlloc);
         mPvProjectionAlloc = new ProgramVertex.MatrixAllocation(mRS);
-        mPvProjectionAlloc.setupProjectionNormalized(mWidth, mHeight);
+        updateProjectionMatrices();
 
         builder = new ProgramVertex.Builder(mRS, null, null);
         ProgramVertex pvbp = builder.create();
@@ -165,7 +202,9 @@ class GalaxyRS extends RenderScriptScene {
         mScript.set_gPVBkProj(pvbp);
 
         ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
-        String t = "void main() {\n" +
+        String t =  "varying vec4 varColor;\n" +
+                    "varying vec4 varTex0;\n" +
+                    "void main() {\n" +
                     "  float dist = ATTRIB_position.y;\n" +
                     "  float angle = ATTRIB_position.x;\n" +
                     "  float x = dist * sin(angle);\n" +
@@ -185,8 +224,9 @@ class GalaxyRS extends RenderScriptScene {
                     "}\n";
         sb.setShader(t);
         sb.addInput(mParticlesMesh.getVertexAllocation(0).getType().getElement());
+        sb.addConstant(mPvStarAlloc.getType());
         ProgramVertex pvs = sb.create();
-        pvs.bindAllocation(mPvProjectionAlloc);
+        pvs.bindConstants(mPvStarAlloc.getAllocation(), 0);
         mScript.set_gPVStars(pvs);
     }
 

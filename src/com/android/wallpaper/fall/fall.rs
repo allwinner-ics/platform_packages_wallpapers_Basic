@@ -381,6 +381,7 @@ int root(int launchID) {
 
     rsgBindProgramVertex(g_PVWater);
     generateRipples();
+    rsAllocationMarkDirty(rsGetAllocation(g_Constants));
     drawRiverbed();
 
     drawLeaves();

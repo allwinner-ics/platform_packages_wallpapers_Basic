@@ -323,6 +323,9 @@ class FallRS extends RenderScriptScene {
         ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
 
         String t = "\n" +
+                "varying vec4 varColor;\n" +
+                "varying vec4 varTex0;\n" +
+
                 "vec2 addDrop(vec4 d, vec2 pos, float dxMul) {\n" +
                 "  vec2 ret = vec2(0.0, 0.0);\n" +
                 "  vec2 delta = d.xy - pos;\n" +
@@ -373,8 +376,7 @@ class FallRS extends RenderScriptScene {
         sb.addConstant(mUniformAlloc.getType());
         sb.addInput(mMesh.getVertexAllocation(0).getType().getElement());
         mPvWater = sb.create();
-        mPvWater.bindAllocation(mPvOrthoAlloc);
-        mPvWater.bindConstants(mUniformAlloc, 1);
+        mPvWater.bindConstants(mUniformAlloc, 0);
 
         mScript.set_g_PVWater(mPvWater);
 
