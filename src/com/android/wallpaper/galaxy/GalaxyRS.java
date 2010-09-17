@@ -47,7 +47,7 @@ class GalaxyRS extends RenderScriptScene {
     private ProgramVertex.MatrixAllocation mPvProjectionAlloc;
     private ScriptField_VpConsts mPvStarAlloc;
     private Mesh mParticlesMesh;
-    private ScriptC_Galaxy mScript;
+    private ScriptC_galaxy mScript;
 
     GalaxyRS(int width, int height) {
         super(width, height);
@@ -58,7 +58,7 @@ class GalaxyRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_Galaxy(mRS, mResources, R.raw.galaxy, true);
+        mScript = new ScriptC_galaxy(mRS, mResources, R.raw.galaxy, true);
         mScript.set_gIsPreview(isPreview() ? 1 : 0);
         if (isPreview()) {
             mScript.set_gXOffset(0.5f);

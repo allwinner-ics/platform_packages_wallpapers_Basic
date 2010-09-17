@@ -67,7 +67,7 @@ class GrassRS extends RenderScriptScene {
     private Allocation mBladesIndicies;
     private Mesh mBladesMesh;
 
-    private ScriptC_Grass mScript;
+    private ScriptC_grass mScript;
 
     private int mVerticies;
     private int mIndicies;
@@ -137,7 +137,7 @@ class GrassRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_Grass(mRS, mResources, R.raw.grass, true);
+        mScript = new ScriptC_grass(mRS, mResources, R.raw.grass, true);
 
         final boolean isPreview = isPreview();
         createProgramVertex();

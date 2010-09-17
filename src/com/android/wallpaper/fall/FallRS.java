@@ -83,7 +83,7 @@ class FallRS extends RenderScriptScene {
     private Mesh mMesh;
     private WorldState mWorldState;
 
-    private ScriptC_Fall mScript;
+    private ScriptC_fall mScript;
 
     private ScriptField_Constants mConstants;
 
@@ -142,7 +142,7 @@ class FallRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_Fall(mRS, mResources, R.raw.fall, true);
+        mScript = new ScriptC_fall(mRS, mResources, R.raw.fall, true);
 
         createMesh();
         createState();

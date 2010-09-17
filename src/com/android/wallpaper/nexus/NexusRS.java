@@ -51,7 +51,7 @@ class NexusRS extends RenderScriptScene {
     private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
 
     private float mXOffset;
-    private ScriptC_Nexus mScript;
+    private ScriptC_nexus mScript;
 
     public NexusRS(int width, int height) {
         super(width, height);
@@ -80,7 +80,7 @@ class NexusRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_Nexus(mRS, mResources, R.raw.nexus, true);
+        mScript = new ScriptC_nexus(mRS, mResources, R.raw.nexus, true);
 
         createProgramFragmentStore();
         createProgramFragment();
