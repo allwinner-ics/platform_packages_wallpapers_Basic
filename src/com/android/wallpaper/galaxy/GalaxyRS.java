@@ -203,7 +203,7 @@ class GalaxyRS extends RenderScriptScene {
 
         ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
         String t =  "varying vec4 varColor;\n" +
-                    "varying vec4 varTex0;\n" +
+                    "varying vec2 varTex0;\n" +
                     "void main() {\n" +
                     "  float dist = ATTRIB_position.y;\n" +
                     "  float angle = ATTRIB_position.x;\n" +

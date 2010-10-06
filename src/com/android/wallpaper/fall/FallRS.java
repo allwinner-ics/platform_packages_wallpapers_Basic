@@ -324,7 +324,7 @@ class FallRS extends RenderScriptScene {
 
         String t = "\n" +
                 "varying vec4 varColor;\n" +
-                "varying vec4 varTex0;\n" +
+                "varying vec2 varTex0;\n" +
 
                 "vec2 addDrop(vec4 d, vec2 pos, float dxMul) {\n" +
                 "  vec2 ret = vec2(0.0, 0.0);\n" +
@@ -345,7 +345,7 @@ class FallRS extends RenderScriptScene {
                 "  gl_Position = vec4(pos.x, pos.y, 0.0, 1.0);\n" +
                 "  float dxMul = 1.0;\n" +
 
-                "  varTex0 = vec4((pos.x + 1.0), (pos.y + 1.6666), 0.0, 0.0);\n" +
+                "  varTex0 = vec2((pos.x + 1.0), (pos.y + 1.6666));\n" +
 
                 "  if (UNI_Rotate < 0.9) {\n" +
                 "    varTex0.xy *= vec2(0.25, 0.33);\n" +
