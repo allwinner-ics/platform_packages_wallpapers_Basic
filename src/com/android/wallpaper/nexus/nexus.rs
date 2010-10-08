@@ -63,7 +63,6 @@ rs_allocation gTBackground;
 rs_allocation gTPulse;
 rs_allocation gTGlow;
 
-#pragma rs export_var(gIsPreview, gXOffset, gMode, gPFTexture, gPSBlend, gPFTexture565, gTBackground, gTPulse, gTGlow)
 #pragma rs export_func(addTap, initPulses)
 
 

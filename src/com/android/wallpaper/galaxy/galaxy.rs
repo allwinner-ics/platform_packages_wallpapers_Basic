@@ -61,7 +61,6 @@ typedef struct VpConsts {
 } VpConsts_t;
 VpConsts_t *vpConstants;
 
-#pragma rs export_var(gXOffset, gIsPreview, gPFBackground, gPFStars, gPVStars, gPVBkProj, gPSLights, gTSpace, gTFlares, gTLight1, gParticlesMesh, Particles, vpConstants)
 #pragma rs export_func()
 
 static float mapf(float minStart, float minStop, float maxStart, float maxStop, float value) {

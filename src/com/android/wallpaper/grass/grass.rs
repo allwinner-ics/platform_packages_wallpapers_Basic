@@ -75,7 +75,6 @@ typedef struct RS_PACKED Vertex {
 Vertex_t *Verticies;
 
 
-#pragma rs export_var(gBladesCount, gIndexCount, gWidth, gHeight, gXOffset, gDawn, gMorning, gAfternoon, gDusk, gIsPreview, gPVBackground, gPFBackground, gPFGrass, gPSBackground, gTNight, gTSunset, gTSunrise, gTSky, gTAa, gBladesMesh, Blades, Verticies)
 #pragma rs export_func(updateBlades)
 
 

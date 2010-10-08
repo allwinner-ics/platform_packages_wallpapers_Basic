@@ -65,8 +65,8 @@ rs_program_store g_PFSBackground;
 
 //float skyOffsetX;
 //float skyOffsetY;
-float g_DT;
-int64_t g_LastTime;
+static float g_DT;
+static int64_t g_LastTime;
 
 typedef struct Drop {
     float ampS;
@@ -76,7 +76,7 @@ typedef struct Drop {
     float y;
 } Drop_t;
 static Drop_t gDrops[10];
-int gMaxDrops;
+static int gMaxDrops;
 
 typedef struct Leaves {
     float x;
@@ -97,7 +97,6 @@ static Leaves_t gLeavesStore[LEAVES_COUNT];
 static Leaves_t* gLeaves[LEAVES_COUNT];
 static Leaves_t* gNextLeaves[LEAVES_COUNT];
 
-#pragma rs export_var(g_glWidth, g_glHeight, g_meshWidth, g_meshHeight, g_xOffset, g_rotate, g_newDropX, g_newDropY, g_PVWater, g_PVSky, g_PFSky, g_PFSLeaf, g_PFBackground, g_TLeaves, g_TRiverbed, g_WaterMesh, g_Constants, g_PFSBackground)
 #pragma rs export_func(initLeaves)
 
 void initLeaves() {
