@@ -36,7 +36,8 @@ class FallView extends RSSurfaceView {
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
 
-        RenderScriptGL RS = createRenderScript(false);
+        RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
+        RenderScriptGL RS = createRenderScript(sc);
         mRender = new FallRS(w, h);
         mRender.init(RS, getResources(), false);
         mRender.start();
