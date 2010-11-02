@@ -229,8 +229,6 @@ class NexusRS extends RenderScriptScene {
         mPfTexture.bindSampler(mWrapSampler, 0);
 
         builder = new ProgramFragment.Builder(mRS);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
-                           ProgramFragment.Builder.Format.RGB, 0);
         mPfColor = builder.create();
         mPfColor.setName("PFColor");
         mPfColor.bindSampler(mWrapSampler, 0);
