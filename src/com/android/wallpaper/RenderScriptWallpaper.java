@@ -16,6 +16,7 @@
 
 package com.android.wallpaper;
 
+import android.graphics.PixelFormat;
 import android.service.wallpaper.WallpaperService;
 import android.os.Bundle;
 import android.renderscript.RenderScriptGL;
@@ -39,6 +40,10 @@ public abstract class RenderScriptWallpaper<T extends RenderScriptScene> extends
             super.onCreate(surfaceHolder);
             setTouchEventsEnabled(false);
             surfaceHolder.setSizeFromLayout();
+
+            if (getResources().getBoolean(R.bool.use_32bit)) {
+                surfaceHolder.setFormat(PixelFormat.RGBX_8888);
+            }
         }
 
         @Override

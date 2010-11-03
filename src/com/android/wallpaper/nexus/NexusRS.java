@@ -51,7 +51,7 @@ class NexusRS extends RenderScriptScene {
 
     private static final int RSID_COMMAND = 1;
 
-    private static final int TEXTURES_COUNT = 3;
+    private static final int TEXTURES_COUNT = 4;
 
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
@@ -189,9 +189,10 @@ class NexusRS extends RenderScriptScene {
     }
 
     private void loadTextures() {
-        mTextures[0] = loadTexture(R.drawable.pyramid_background, "TBackground");
+        mTextures[0] = loadTextureARGB(R.drawable.pyramid_background, "TBackground");
         mTextures[1] = loadTextureARGB(R.drawable.pulse, "TPulse");
-        mTextures[2] = loadTextureARGB(R.drawable.glow, "TGlow");
+        mTextures[2] = loadTextureARGB(R.drawable.pulse_vert, "TPulseVert");
+        mTextures[3] = loadTextureARGB(R.drawable.glow, "TGlow");
 
         final int count = mTextures.length;
         for (int i = 0; i < count; i++) {
@@ -218,8 +219,8 @@ class NexusRS extends RenderScriptScene {
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
         sampleBuilder.setMin(LINEAR);
         sampleBuilder.setMag(LINEAR);
-        sampleBuilder.setWrapS(WRAP);
-        sampleBuilder.setWrapT(WRAP);
+        sampleBuilder.setWrapS(CLAMP);
+        sampleBuilder.setWrapT(CLAMP);
         mWrapSampler = sampleBuilder.create();
         ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
         builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
@@ -241,7 +242,7 @@ class NexusRS extends RenderScriptScene {
         builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
                            ProgramFragment.Builder.Format.RGB, 0);
         mPfTexture565 = builder.create();
-        mPfTexture565.setName("PFTexture565");
+        mPfTexture565.setName("PFTextureBG");
         mPfTexture565.bindSampler(mClampSampler, 0);
     }
 
