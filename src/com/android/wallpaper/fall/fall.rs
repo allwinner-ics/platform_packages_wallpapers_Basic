@@ -139,12 +139,12 @@ void init() {
     g_DT = 0.1f;
 }
 
-void updateDrop(int ct) {
+static void updateDrop(int ct) {
     gDrops[ct].spread += 30.f * g_DT;
     gDrops[ct].ampE = gDrops[ct].ampS / gDrops[ct].spread;
 }
 
-void drop(int x, int y, float s) {
+static void drop(int x, int y, float s) {
     int ct;
     int iMin = 0;
     float minAmp = 10000.f;
@@ -161,7 +161,7 @@ void drop(int x, int y, float s) {
     updateDrop(iMin);
 }
 
-void generateRipples() {
+static void generateRipples() {
     int ct;
     for (ct = 0; ct < gMaxDrops; ct++) {
         Drop_t * d = &gDrops[ct];
@@ -179,13 +179,13 @@ void generateRipples() {
     }
 }
 
-void genLeafDrop(Leaves_t *leaf, float amp) {
+static void genLeafDrop(Leaves_t *leaf, float amp) {
     float nx = (leaf->x + g_glWidth * 0.5f) / g_glWidth;
     float ny = (leaf->y + g_glHeight * 0.5f) / g_glHeight;
     drop(nx * g_meshWidth, g_meshHeight - ny * g_meshHeight, amp);
 }
 
-int drawLeaf(Leaves_t *leaf) {
+static int drawLeaf(Leaves_t *leaf) {
 
     float x = leaf->x;
     float y = leaf->y;
@@ -295,7 +295,7 @@ int drawLeaf(Leaves_t *leaf) {
     return newLeaf;
 }
 
-void drawLeaves() {
+static void drawLeaves() {
     rsgBindProgramFragment(g_PFSky);
     rsgBindProgramStore(g_PFSLeaf);
     rsgBindProgramVertex(g_PVSky);
@@ -341,7 +341,7 @@ void drawLeaves() {
     rsgProgramVertexLoadModelMatrix(&matrix);
 }
 
-void drawRiverbed() {
+static void drawRiverbed() {
     rsgBindProgramFragment(g_PFBackground);
     rsgBindProgramStore(g_PFSBackground);
     rsgBindTexture(g_PFBackground, 0, g_TRiverbed);
