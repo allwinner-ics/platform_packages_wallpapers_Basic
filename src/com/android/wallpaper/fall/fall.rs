@@ -97,8 +97,6 @@ static Leaves_t gLeavesStore[LEAVES_COUNT];
 static Leaves_t* gLeaves[LEAVES_COUNT];
 static Leaves_t* gNextLeaves[LEAVES_COUNT];
 
-#pragma rs export_func(initLeaves)
-
 void initLeaves() {
     Leaves_t *leaf = gLeavesStore;
     // globals haven't been set at this point yet. We need to find the correct

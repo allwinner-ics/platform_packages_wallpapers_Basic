@@ -74,10 +74,6 @@ typedef struct RS_PACKED Vertex {
 } __attribute__((packed,aligned(4))) Vertex_t;
 Vertex_t *Verticies;
 
-
-#pragma rs export_func(updateBlades)
-
-
 #define B 0x100
 #define BM 0xff
 #define N 0x1000
