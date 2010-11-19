@@ -63,9 +63,6 @@ rs_allocation gTBackground;
 rs_allocation gTPulse;
 rs_allocation gTGlow;
 
-#pragma rs export_func(addTap, initPulses)
-
-
 static void setColor(int c) {
     if (gMode == 1) {
         // sholes red

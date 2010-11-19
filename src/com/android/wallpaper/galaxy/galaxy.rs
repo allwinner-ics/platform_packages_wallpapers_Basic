@@ -61,8 +61,6 @@ typedef struct VpConsts {
 } VpConsts_t;
 VpConsts_t *vpConstants;
 
-#pragma rs export_func()
-
 static float mapf(float minStart, float minStop, float maxStart, float maxStop, float value) {
     return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
 }
