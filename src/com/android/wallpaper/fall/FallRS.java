@@ -105,9 +105,9 @@ class FallRS extends RenderScriptScene {
     @Override
     public Bundle onCommand(String action, int x, int y, int z, Bundle extras,
             boolean resultRequested) {
-        if (WallpaperManager.COMMAND_TAP.equals(action)) {
-            addDrop(x + (mWorldState.rotate == 0 ? (mWorldState.width * mWorldState.xOffset) : 0), y);
-        } else if (WallpaperManager.COMMAND_DROP.equals(action)) {
+        if (WallpaperManager.COMMAND_TAP.equals(action)
+                || WallpaperManager.COMMAND_SECONDARY_TAP.equals(action)
+                || WallpaperManager.COMMAND_DROP.equals(action)) {
             addDrop(x + (mWorldState.rotate == 0 ? (mWorldState.width * mWorldState.xOffset) : 0), y);
         }
         return null;
@@ -239,9 +239,6 @@ class FallRS extends RenderScriptScene {
         mScript.set_g_meshHeight(mWorldState.meshHeight);
         mScript.set_g_xOffset(0);
         mScript.set_g_rotate(mWorldState.rotate);
-
-        mScript.set_g_newDropX(-1);
-        mScript.set_g_newDropY(-1);
     }
 
     private void loadTextures() {
@@ -386,7 +383,6 @@ class FallRS extends RenderScriptScene {
         int dropX = (int) ((x / mWidth) * mMeshWidth);
         int dropY = (int) ((y / mHeight) * mMeshHeight);
 
-        mScript.set_g_newDropX(dropX);
-        mScript.set_g_newDropY(dropY);
+        mScript.invoke_addDrop(dropX, dropY);
     }
 }

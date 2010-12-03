@@ -26,6 +26,7 @@ import static android.renderscript.Sampler.Value.WRAP;
 import com.android.wallpaper.R;
 import com.android.wallpaper.RenderScriptScene;
 
+import android.app.WallpaperManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -179,9 +180,9 @@ class NexusRS extends RenderScriptScene {
         //     "dw=%d, bw=%d, xOffset=%g, x=%d",
         //     dw, bw, mWorldState.xOffset, x));
 
-        if ("android.wallpaper.tap".equals(action)) {
-            mScript.invoke_addTap(x, y);
-        } else if ("android.home.drop".equals(action)) {
+        if (WallpaperManager.COMMAND_TAP.equals(action)
+                || WallpaperManager.COMMAND_SECONDARY_TAP.equals(action)
+                || WallpaperManager.COMMAND_DROP.equals(action)) {
             mScript.invoke_addTap(x, y);
         }
         return null;
