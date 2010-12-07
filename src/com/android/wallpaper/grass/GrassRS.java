@@ -137,7 +137,7 @@ class GrassRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_grass(mRS, mResources, R.raw.grass, true);
+        mScript = new ScriptC_grass(mRS, mResources, R.raw.grass);
 
         final boolean isPreview = isPreview();
         createProgramVertex();
@@ -221,7 +221,7 @@ class GrassRS extends RenderScriptScene {
             vtxIdx += 2;
         }
 
-        mBladesIndicies.data(idx);
+        mBladesIndicies.copyFrom(idx);
         mBladesIndicies.uploadToBufferObject();
     }
 
@@ -255,9 +255,9 @@ class GrassRS extends RenderScriptScene {
 
     private Allocation generateTextureAlpha(int width, int height, int[] data) {
         final Type.Builder builder = new Type.Builder(mRS, A_8(mRS));
-        builder.add(Dimension.X, width);
-        builder.add(Dimension.Y, height);
-        builder.add(Dimension.LOD, 1);
+        builder.setX(width);
+        builder.setY(height);
+        builder.setMipmaps(true);
 
         final Allocation allocation = Allocation.createTyped(mRS, builder.create());
         int[] grey1 = new int[] {0x3f3f3f3f};

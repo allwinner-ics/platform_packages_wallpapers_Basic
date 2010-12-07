@@ -34,7 +34,7 @@ class GrassView extends RSSurfaceView {
         super.surfaceChanged(holder, format, w, h);
 
         RenderScriptGL.SurfaceConfig sc = new RenderScriptGL.SurfaceConfig();
-        RenderScriptGL RS = createRenderScript(sc);
+        RenderScriptGL RS = createRenderScriptGL(sc);
         GrassRS render = new GrassRS(getContext(), w, h);
         render.init(RS, getResources(), false);
         render.setOffset(0.5f, 0.0f, 0, 0);

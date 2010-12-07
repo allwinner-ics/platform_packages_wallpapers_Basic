@@ -58,7 +58,7 @@ class GalaxyRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_galaxy(mRS, mResources, R.raw.galaxy, true);
+        mScript = new ScriptC_galaxy(mRS, mResources, R.raw.galaxy);
         mScript.set_gIsPreview(isPreview() ? 1 : 0);
         if (isPreview()) {
             mScript.set_gXOffset(0.5f);
@@ -177,7 +177,7 @@ class GalaxyRS extends RenderScriptScene {
     private void createProgramFragmentStore() {
         ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
-        mRS.contextBindProgramStore(builder.create());
+        mRS.bindProgramStore(builder.create());
 
         builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE);
         mScript.set_gPSLights(builder.create());
@@ -189,7 +189,7 @@ class GalaxyRS extends RenderScriptScene {
         ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
         ProgramVertex pvbo = builder.create();
         pvbo.bindAllocation(mPvOrthoAlloc);
-        mRS.contextBindProgramVertex(pvbo);
+        mRS.bindProgramVertex(pvbo);
 
         mPvStarAlloc = new ScriptField_VpConsts(mRS, 1);
         mScript.bind_vpConstants(mPvStarAlloc);
@@ -235,7 +235,7 @@ class GalaxyRS extends RenderScriptScene {
         b.setPointSmoothEnable(true);
         b.setPointSpriteEnable(true);
         ProgramRaster pr = b.create();
-        mRS.contextBindProgramRaster(pr);
+        mRS.bindProgramRaster(pr);
     }
 
 }

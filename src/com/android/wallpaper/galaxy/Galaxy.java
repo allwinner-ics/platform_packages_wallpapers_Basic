@@ -34,13 +34,13 @@ public class Galaxy extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        mView.onResume();
+        mView.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mView.onPause();
+        mView.pause();
 
         Runtime.getRuntime().exit(0);
     }

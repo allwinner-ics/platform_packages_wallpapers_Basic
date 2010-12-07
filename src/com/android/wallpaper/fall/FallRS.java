@@ -142,7 +142,7 @@ class FallRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_fall(mRS, mResources, R.raw.fall, true);
+        mScript = new ScriptC_fall(mRS, mResources, R.raw.fall);
 
         createMesh();
         createState();

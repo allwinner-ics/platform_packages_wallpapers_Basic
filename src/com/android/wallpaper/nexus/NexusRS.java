@@ -81,7 +81,7 @@ class NexusRS extends RenderScriptScene {
 
     @Override
     protected ScriptC createScript() {
-        mScript = new ScriptC_nexus(mRS, mResources, R.raw.nexus, true);
+        mScript = new ScriptC_nexus(mRS, mResources, R.raw.nexus);
 
         createProgramFragmentStore();
         createProgramFragment();
@@ -148,7 +148,7 @@ class NexusRS extends RenderScriptScene {
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
         builder.setDitherEnable(false);
         ProgramStore solid = builder.create();
-        mRS.contextBindProgramStore(solid);
+        mRS.bindProgramStore(solid);
 
         builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE);
         mScript.set_gPSBlend(builder.create());
@@ -162,7 +162,7 @@ class NexusRS extends RenderScriptScene {
         pvb.setTextureMatrixEnable(true);
         ProgramVertex pv = pvb.create();
         pv.bindAllocation(mPvOrthoAlloc);
-        mRS.contextBindProgramVertex(pv);
+        mRS.bindProgramVertex(pv);
     }
 
     @Override
