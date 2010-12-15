@@ -142,17 +142,14 @@ class GalaxyRS extends RenderScriptScene {
     }
 
     private Allocation loadTexture(int id) {
-        final Allocation allocation = Allocation.createFromBitmapResource(mRS, mResources,
-                id, RGB_565(mRS), false);
-        allocation.uploadToTexture(0);
+        final Allocation allocation = Allocation.createFromBitmapResource(mRS, mResources, id);
         return allocation;
     }
 
     // TODO: Fix Allocation.createFromBitmapResource() to do this when RGBA_8888 is specified
     private Allocation loadTextureARGB(int id) {
         Bitmap b = BitmapFactory.decodeResource(mResources, id, mOptionsARGB);
-        final Allocation allocation = Allocation.createFromBitmap(mRS, b, RGBA_8888(mRS), false);
-        allocation.uploadToTexture(0);
+        final Allocation allocation = Allocation.createFromBitmap(mRS, b);
         return allocation;
     }
 
