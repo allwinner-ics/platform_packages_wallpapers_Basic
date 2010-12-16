@@ -259,7 +259,8 @@ class GrassRS extends RenderScriptScene {
         builder.setY(height);
         builder.setMipmaps(true);
 
-        final Allocation allocation = Allocation.createTyped(mRS, builder.create());
+        final Allocation allocation = Allocation.createTyped(mRS, builder.create(),
+                                                             Allocation.USAGE_GRAPHICS_TEXTURE);
         int[] grey1 = new int[] {0x3f3f3f3f};
         int[] grey2 = new int[] {0x00000000};
         Allocation.Adapter2D a = allocation.createAdapter2D();
@@ -270,7 +271,6 @@ class GrassRS extends RenderScriptScene {
         a.setConstraint(Dimension.LOD, 2);
         a.subData(0, 0, 1, 1, grey2);
 
-        allocation.uploadToTexture(0);
         return allocation;
     }
 
