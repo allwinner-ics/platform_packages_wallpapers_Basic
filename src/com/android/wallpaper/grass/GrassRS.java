@@ -222,7 +222,6 @@ class GrassRS extends RenderScriptScene {
         }
 
         mBladesIndicies.copyFrom(idx);
-        mBladesIndicies.uploadToBufferObject();
     }
 
     private void createBlade(ScriptField_Blade.Item blades) {
