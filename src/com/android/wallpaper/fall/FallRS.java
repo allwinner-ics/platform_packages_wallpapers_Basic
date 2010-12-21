@@ -17,16 +17,7 @@
 package com.android.wallpaper.fall;
 
 import android.os.Bundle;
-import android.renderscript.Element;
-import android.renderscript.ScriptC;
-import android.renderscript.ProgramFragment;
-import android.renderscript.ProgramStore;
-import android.renderscript.ProgramVertex;
-import android.renderscript.Allocation;
-import android.renderscript.Sampler;
-import android.renderscript.Type;
-import android.renderscript.Mesh;
-import android.renderscript.Script;
+import android.renderscript.*;
 import static android.renderscript.Sampler.Value.LINEAR;
 import static android.renderscript.Sampler.Value.CLAMP;
 import static android.renderscript.ProgramStore.DepthFunc.*;
@@ -71,7 +62,7 @@ class FallRS extends RenderScriptScene {
     private ProgramVertex mPvSky;
     @SuppressWarnings({"FieldCanBeLocal"})
     private ProgramVertex mPvWater;
-    private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
+    private ProgramVertexFixedFunction.Constants mPvOrthoAlloc;
     @SuppressWarnings({"FieldCanBeLocal"})
     private Sampler mSampler;
 
@@ -137,7 +128,9 @@ class FallRS extends RenderScriptScene {
 
         mScript.invoke_initLeaves();
 
-        mPvOrthoAlloc.setupProjectionNormalized(mWidth, mHeight);
+        Matrix4f proj = new Matrix4f();
+        proj.loadProjectionNormalized(mWidth, mHeight);
+        mPvOrthoAlloc.setProjection(proj);
     }
 
     @Override
@@ -259,23 +252,23 @@ class FallRS extends RenderScriptScene {
 
     private void createProgramFragment() {
         Sampler.Builder sampleBuilder = new Sampler.Builder(mRS);
-        sampleBuilder.setMin(LINEAR);
-        sampleBuilder.setMag(LINEAR);
+        sampleBuilder.setMinification(LINEAR);
+        sampleBuilder.setMagnification(LINEAR);
         sampleBuilder.setWrapS(CLAMP);
         sampleBuilder.setWrapT(CLAMP);
         mSampler = sampleBuilder.create();
 
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
-                           ProgramFragment.Builder.Format.RGBA, 0);
+        ProgramFragmentFixedFunction.Builder builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         mPfBackground = builder.create();
         mPfBackground.bindSampler(mSampler, 0);
 
         mScript.set_g_PFBackground(mPfBackground);
 
-        builder = new ProgramFragment.Builder(mRS);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
-                           ProgramFragment.Builder.Format.RGBA, 0);
+        builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.MODULATE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         mPfSky = builder.create();
         mPfSky.bindSampler(mSampler, 0);
 
@@ -283,18 +276,18 @@ class FallRS extends RenderScriptScene {
     }
 
     private void createProgramFragmentStore() {
-        ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
+        ProgramStore.Builder builder = new ProgramStore.Builder(mRS);
         builder.setDepthFunc(ALWAYS);
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
-        builder.setDitherEnable(false);
-        builder.setDepthMask(true);
+        builder.setDitherEnabled(false);
+        builder.setDepthMaskEnabled(true);
         mPfsBackground = builder.create();
 
-        builder = new ProgramStore.Builder(mRS, null, null);
+        builder = new ProgramStore.Builder(mRS);
         builder.setDepthFunc(ALWAYS);
         builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        builder.setDitherEnable(false);
-        builder.setDepthMask(true);
+        builder.setDitherEnabled(false);
+        builder.setDepthMaskEnabled(true);
         mPfsLeaf = builder.create();
 
         mScript.set_g_PFSLeaf(mPfsLeaf);
@@ -302,19 +295,22 @@ class FallRS extends RenderScriptScene {
     }
 
     private void createProgramVertex() {
-        mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
-        mPvOrthoAlloc.setupProjectionNormalized(mWidth, mHeight);
+        mPvOrthoAlloc = new ProgramVertexFixedFunction.Constants(mRS);
+        Matrix4f proj = new Matrix4f();
+        proj.loadProjectionNormalized(mWidth, mHeight);
+        mPvOrthoAlloc.setProjection(proj);
 
-        ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
+
+        ProgramVertexFixedFunction.Builder builder = new ProgramVertexFixedFunction.Builder(mRS);
         mPvSky = builder.create();
-        mPvSky.bindAllocation(mPvOrthoAlloc);
+        ((ProgramVertexFixedFunction)mPvSky).bindConstants(mPvOrthoAlloc);
 
         mScript.set_g_PVSky(mPvSky);
 
         mConstants = new ScriptField_Constants(mRS, 1);
         mUniformAlloc = mConstants.getAllocation();
 
-        ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
+        ProgramVertex.Builder sb = new ProgramVertex.Builder(mRS);
 
         String t = "\n" +
                 "varying vec4 varColor;\n" +

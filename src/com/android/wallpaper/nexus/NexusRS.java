@@ -32,14 +32,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.renderscript.Allocation;
-import android.renderscript.ProgramFragment;
-import android.renderscript.ProgramStore;
-import android.renderscript.ProgramVertex;
-import android.renderscript.Sampler;
-import android.renderscript.Script;
-import android.renderscript.ScriptC;
-import android.renderscript.Type;
+import android.renderscript.*;
 import android.renderscript.ProgramStore.BlendDstFunc;
 import android.renderscript.ProgramStore.BlendSrcFunc;
 import android.view.SurfaceHolder;
@@ -49,7 +42,7 @@ import java.util.TimeZone;
 class NexusRS extends RenderScriptScene {
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
-    private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
+    private ProgramVertexFixedFunction.Constants mPvOrthoAlloc;
 
     private float mXOffset;
     private ScriptC_nexus mScript;
@@ -121,27 +114,27 @@ class NexusRS extends RenderScriptScene {
 
     private void createProgramFragment() {
         // sampler and program fragment for pulses
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
-                           ProgramFragment.Builder.Format.RGBA, 0);
+        ProgramFragmentFixedFunction.Builder builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.MODULATE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         ProgramFragment pft = builder.create();
         pft.bindSampler(Sampler.WRAP_LINEAR(mRS), 0);
         mScript.set_gPFTexture(pft);
 
         // sampler and program fragment for background image
-        builder = new ProgramFragment.Builder(mRS);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
-                           ProgramFragment.Builder.Format.RGB, 0);
+        builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.MODULATE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGB, 0);
         ProgramFragment pft565 = builder.create();
         pft565.bindSampler(Sampler.CLAMP_NEAREST(mRS), 0);
         mScript.set_gPFTexture565(pft565);
     }
 
     private void createProgramFragmentStore() {
-        ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
+        ProgramStore.Builder builder = new ProgramStore.Builder(mRS);
         builder.setDepthFunc(ALWAYS);
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ONE);
-        builder.setDitherEnable(false);
+        builder.setDitherEnabled(false);
         ProgramStore solid = builder.create();
         mRS.bindProgramStore(solid);
 
@@ -150,13 +143,15 @@ class NexusRS extends RenderScriptScene {
     }
 
     private void createProgramVertex() {
-        mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
-        mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
+        mPvOrthoAlloc = new ProgramVertexFixedFunction.Constants(mRS);
+        Matrix4f proj = new Matrix4f();
+        proj.loadOrthoWindow(mWidth, mHeight);
+        mPvOrthoAlloc.setProjection(proj);
 
-        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
+        ProgramVertexFixedFunction.Builder pvb = new ProgramVertexFixedFunction.Builder(mRS);
         pvb.setTextureMatrixEnable(true);
         ProgramVertex pv = pvb.create();
-        pv.bindAllocation(mPvOrthoAlloc);
+        ((ProgramVertexFixedFunction)pv).bindConstants(mPvOrthoAlloc);
         mRS.bindProgramVertex(pv);
     }
 

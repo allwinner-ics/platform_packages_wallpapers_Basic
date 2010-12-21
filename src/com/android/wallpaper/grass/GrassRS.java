@@ -20,18 +20,10 @@ import android.renderscript.Sampler;
 import static android.renderscript.ProgramStore.DepthFunc.*;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
 import static android.renderscript.ProgramStore.BlendDstFunc;
-import android.renderscript.ProgramFragment;
-import android.renderscript.ProgramStore;
-import android.renderscript.Allocation;
-import android.renderscript.ProgramVertex;
+import android.renderscript.*;
 import static android.renderscript.Element.*;
 import static android.util.MathUtils.*;
-import android.renderscript.ScriptC;
-import android.renderscript.Type;
-import android.renderscript.Dimension;
-import android.renderscript.Element;
-import android.renderscript.Mesh;
-import android.renderscript.Primitive;
+import android.renderscript.Mesh.Primitive;
 import static android.renderscript.Sampler.Value.*;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -61,7 +53,7 @@ class GrassRS extends RenderScriptScene {
 
     private ScriptField_Blade mBlades;
     private ScriptField_Vertex mVertexBuffer;
-    private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
+    private ProgramVertexFixedFunction.Constants mPvOrthoAlloc;
 
     //private Allocation mBladesBuffer;
     private Allocation mBladesIndicies;
@@ -132,7 +124,9 @@ class GrassRS extends RenderScriptScene {
         mScript.set_gWidth(width);
         mScript.set_gHeight(height);
         mScript.invoke_updateBlades();
-        mPvOrthoAlloc.setupOrthoWindow(width, height);
+        Matrix4f proj = new Matrix4f();
+        proj.loadOrthoWindow(width, height);
+        mPvOrthoAlloc.setProjection(proj);
     }
 
     @Override
@@ -200,7 +194,7 @@ class GrassRS extends RenderScriptScene {
         meshBuilder.addVertexAllocation(mVertexBuffer.getAllocation());
 
         mBladesIndicies = Allocation.createSized(mRS, Element.U16(mRS), mIndicies);
-        meshBuilder.addIndexAllocation(mBladesIndicies, Primitive.TRIANGLE);
+        meshBuilder.addIndexSetAllocation(mBladesIndicies, Primitive.TRIANGLE);
 
         mBladesMesh = meshBuilder.create();
 
@@ -279,48 +273,50 @@ class GrassRS extends RenderScriptScene {
 
     private void createProgramFragment() {
         Sampler.Builder samplerBuilder = new Sampler.Builder(mRS);
-        samplerBuilder.setMin(LINEAR_MIP_LINEAR);
-        samplerBuilder.setMag(LINEAR);
+        samplerBuilder.setMinification(LINEAR_MIP_LINEAR);
+        samplerBuilder.setMagnification(LINEAR);
         samplerBuilder.setWrapS(WRAP);
         samplerBuilder.setWrapT(WRAP);
         Sampler sl = samplerBuilder.create();
 
-        samplerBuilder.setMin(NEAREST);
-        samplerBuilder.setMag(NEAREST);
+        samplerBuilder.setMinification(NEAREST);
+        samplerBuilder.setMagnification(NEAREST);
         Sampler sn = samplerBuilder.create();
 
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
-                           ProgramFragment.Builder.Format.ALPHA, 0);
+        ProgramFragmentFixedFunction.Builder builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
+                           ProgramFragmentFixedFunction.Builder.Format.ALPHA, 0);
         builder.setVaryingColor(true);
         ProgramFragment pf = builder.create();
         mScript.set_gPFGrass(pf);
         pf.bindSampler(sl, 0);
 
-        builder = new ProgramFragment.Builder(mRS);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
-                           ProgramFragment.Builder.Format.RGB, 0);
+        builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGB, 0);
         pf = builder.create();
         mScript.set_gPFBackground(pf);
         pf.bindSampler(sn, 0);
     }
 
     private void createProgramFragmentStore() {
-        ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
+        ProgramStore.Builder builder = new ProgramStore.Builder(mRS);
         builder.setDepthFunc(ALWAYS);
         builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE_MINUS_SRC_ALPHA);
-        builder.setDitherEnable(false);
-        builder.setDepthMask(false);
+        builder.setDitherEnabled(false);
+        builder.setDepthMaskEnabled(false);
         mScript.set_gPSBackground(builder.create());
     }
 
     private void createProgramVertex() {
-        mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
-        mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
+        mPvOrthoAlloc = new ProgramVertexFixedFunction.Constants(mRS);
+        Matrix4f proj = new Matrix4f();
+        proj.loadOrthoWindow(mWidth, mHeight);
+        mPvOrthoAlloc.setProjection(proj);
 
-        ProgramVertex.Builder pvb = new ProgramVertex.Builder(mRS, null, null);
+        ProgramVertexFixedFunction.Builder pvb = new ProgramVertexFixedFunction.Builder(mRS);
         ProgramVertex pv = pvb.create();
-        pv.bindAllocation(mPvOrthoAlloc);
+        ((ProgramVertexFixedFunction)pv).bindConstants(mPvOrthoAlloc);
         mScript.set_gPVBackground(pv);
     }
 

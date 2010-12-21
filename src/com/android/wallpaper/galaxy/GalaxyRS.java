@@ -16,18 +16,8 @@
 
 package com.android.wallpaper.galaxy;
 
-import android.renderscript.ScriptC;
-import android.renderscript.ProgramFragment;
-import android.renderscript.ProgramStore;
-import android.renderscript.ProgramVertex;
-import android.renderscript.ProgramRaster;
-import android.renderscript.Allocation;
-import android.renderscript.Sampler;
-import android.renderscript.Element;
-import android.renderscript.Mesh;
-import android.renderscript.Matrix4f;
-import android.renderscript.Primitive;
-import android.renderscript.Type;
+import android.renderscript.*;
+import android.renderscript.Mesh.Primitive;
 import static android.renderscript.ProgramStore.DepthFunc.*;
 import static android.renderscript.ProgramStore.BlendDstFunc;
 import static android.renderscript.ProgramStore.BlendSrcFunc;
@@ -43,8 +33,8 @@ import com.android.wallpaper.RenderScriptScene;
 class GalaxyRS extends RenderScriptScene {
     private static final int PARTICLES_COUNT = 12000;
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
-    private ProgramVertex.MatrixAllocation mPvOrthoAlloc;
-    private ProgramVertex.MatrixAllocation mPvProjectionAlloc;
+    private ProgramVertexFixedFunction.Constants mPvOrthoAlloc;
+    private ProgramVertexFixedFunction.Constants mPvProjectionAlloc;
     private ScriptField_VpConsts mPvStarAlloc;
     private Mesh mParticlesMesh;
     private ScriptC_galaxy mScript;
@@ -80,8 +70,9 @@ class GalaxyRS extends RenderScriptScene {
         ScriptField_Particle p = new ScriptField_Particle(mRS, PARTICLES_COUNT);
 
         final Mesh.AllocationBuilder meshBuilder = new Mesh.AllocationBuilder(mRS);
-        final int vertexSlot = meshBuilder.addVertexAllocation(p.getAllocation());
-        meshBuilder.addIndexType(Primitive.POINT);
+        meshBuilder.addVertexAllocation(p.getAllocation());
+        final int vertexSlot = meshBuilder.getCurrentVertexTypeIndex();
+        meshBuilder.addIndexSetType(Primitive.POINT);
         mParticlesMesh = meshBuilder.create();
 
         mScript.set_gParticlesMesh(mParticlesMesh);
@@ -113,14 +104,16 @@ class GalaxyRS extends RenderScriptScene {
     }
 
     private void updateProjectionMatrices() {
-        mPvOrthoAlloc.setupOrthoWindow(mWidth, mHeight);
+        Matrix4f proj = new Matrix4f();
+        proj.loadOrthoWindow(mWidth, mHeight);
+        mPvOrthoAlloc.setProjection(proj);
 
         Matrix4f projNorm = getProjectionNormalized(mWidth, mHeight);
         ScriptField_VpConsts.Item i = new ScriptField_VpConsts.Item();
         i.Proj = projNorm;
         i.MVP = projNorm;
         mPvStarAlloc.set(i, 0, true);
-        mPvProjectionAlloc.loadProjection(projNorm);
+        mPvProjectionAlloc.setProjection(projNorm);
     }
 
     @Override
@@ -154,17 +147,17 @@ class GalaxyRS extends RenderScriptScene {
     }
 
     private void createProgramFragment() {
-        ProgramFragment.Builder builder = new ProgramFragment.Builder(mRS);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.REPLACE,
-                           ProgramFragment.Builder.Format.RGB, 0);
+        ProgramFragmentFixedFunction.Builder builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGB, 0);
         ProgramFragment pfb = builder.create();
         pfb.bindSampler(Sampler.WRAP_NEAREST(mRS), 0);
         mScript.set_gPFBackground(pfb);
 
-        builder = new ProgramFragment.Builder(mRS);
+        builder = new ProgramFragmentFixedFunction.Builder(mRS);
         builder.setPointSpriteTexCoordinateReplacement(true);
-        builder.setTexture(ProgramFragment.Builder.EnvMode.MODULATE,
-                           ProgramFragment.Builder.Format.RGBA, 0);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.MODULATE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         builder.setVaryingColor(true);
         ProgramFragment pfs = builder.create();
         pfs.bindSampler(Sampler.WRAP_LINEAR(mRS), 0);
@@ -172,7 +165,7 @@ class GalaxyRS extends RenderScriptScene {
     }
 
     private void createProgramFragmentStore() {
-        ProgramStore.Builder builder = new ProgramStore.Builder(mRS, null, null);
+        ProgramStore.Builder builder = new ProgramStore.Builder(mRS);
         builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
         mRS.bindProgramStore(builder.create());
 
@@ -181,24 +174,24 @@ class GalaxyRS extends RenderScriptScene {
     }
 
     private void createProgramVertex() {
-        mPvOrthoAlloc = new ProgramVertex.MatrixAllocation(mRS);
+        mPvOrthoAlloc = new ProgramVertexFixedFunction.Constants(mRS);
 
-        ProgramVertex.Builder builder = new ProgramVertex.Builder(mRS, null, null);
+        ProgramVertexFixedFunction.Builder builder = new ProgramVertexFixedFunction.Builder(mRS);
         ProgramVertex pvbo = builder.create();
-        pvbo.bindAllocation(mPvOrthoAlloc);
+        ((ProgramVertexFixedFunction)pvbo).bindConstants(mPvOrthoAlloc);
         mRS.bindProgramVertex(pvbo);
 
         mPvStarAlloc = new ScriptField_VpConsts(mRS, 1);
         mScript.bind_vpConstants(mPvStarAlloc);
-        mPvProjectionAlloc = new ProgramVertex.MatrixAllocation(mRS);
+        mPvProjectionAlloc = new ProgramVertexFixedFunction.Constants(mRS);
         updateProjectionMatrices();
 
-        builder = new ProgramVertex.Builder(mRS, null, null);
+        builder = new ProgramVertexFixedFunction.Builder(mRS);
         ProgramVertex pvbp = builder.create();
-        pvbp.bindAllocation(mPvProjectionAlloc);
+        ((ProgramVertexFixedFunction)pvbp).bindConstants(mPvProjectionAlloc);
         mScript.set_gPVBkProj(pvbp);
 
-        ProgramVertex.ShaderBuilder sb = new ProgramVertex.ShaderBuilder(mRS);
+        ProgramVertex.Builder sb = new ProgramVertex.Builder(mRS);
         String t =  "varying vec4 varColor;\n" +
                     "varying vec2 varTex0;\n" +
                     "void main() {\n" +
@@ -229,8 +222,7 @@ class GalaxyRS extends RenderScriptScene {
 
     private void createProgramRaster() {
         ProgramRaster.Builder b = new ProgramRaster.Builder(mRS);
-        b.setPointSmoothEnable(true);
-        b.setPointSpriteEnable(true);
+        b.setPointSpriteEnabled(true);
         ProgramRaster pr = b.create();
         mRS.bindProgramRaster(pr);
     }
