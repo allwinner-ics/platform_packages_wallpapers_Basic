@@ -256,13 +256,14 @@ class GrassRS extends RenderScriptScene {
                                                              Allocation.USAGE_GRAPHICS_TEXTURE);
         int[] grey1 = new int[] {0x3f3f3f3f};
         int[] grey2 = new int[] {0x00000000};
-        Allocation.Adapter2D a = allocation.createAdapter2D();
-        a.setConstraint(Dimension.LOD, 0);
-        a.subData(0, 0, 4, 1, data);
-        a.setConstraint(Dimension.LOD, 1);
-        a.subData(0, 0, 2, 1, grey1);
-        a.setConstraint(Dimension.LOD, 2);
-        a.subData(0, 0, 1, 1, grey2);
+
+        AllocationAdapter a = AllocationAdapter.create2D(mRS, allocation);
+        a.setLOD(0);
+        a.copyFrom(data);
+        a.setLOD(1);
+        a.copyFrom(grey1);
+        a.setLOD(2);
+        a.copyFrom(grey2);
 
         return allocation;
     }
