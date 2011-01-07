@@ -219,7 +219,12 @@ void updateBlades()
 
 static float time(int isPreview) {
     if (REAL_TIME && !isPreview) {
-        return (rsHour() * 3600.0f + rsMinute() * 60.0f + rsSecond()) / SECONDS_IN_DAY;
+        rs_time_t currentTime = rsTime(0);
+        rs_tm localTime;
+        rsLocaltime(&localTime, &currentTime);
+        return (localTime.tm_hour * 3600.0f +
+                localTime.tm_min * 60.0f +
+                localTime.tm_sec) / SECONDS_IN_DAY;
     }
     float t = rsUptimeMillis() / 30000.0f;
     return t - (int) t;
