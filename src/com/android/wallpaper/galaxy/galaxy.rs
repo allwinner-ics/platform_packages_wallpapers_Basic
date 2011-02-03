@@ -179,7 +179,7 @@ static void drawParticles(float offset) {
     rsMatrixRotate(&matrix, a, 0.0f, 0.4f, 0.1f);
     rsMatrixLoad(&vpConstants->MVP, &vpConstants->Proj);
     rsMatrixMultiply(&vpConstants->MVP, &matrix);
-    rsAllocationMarkDirty(rsGetAllocation(vpConstants));
+    rsgAllocationSyncAll(rsGetAllocation(vpConstants));
 
     rsgBindProgramVertex(gPVStars);
     rsgBindProgramFragment(gPFStars);
