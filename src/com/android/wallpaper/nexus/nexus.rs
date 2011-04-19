@@ -26,7 +26,8 @@
 #define GLOW_SIZE            64 // Size of the leading glow in pixels
 #define HALF_GLOW_SIZE       32
 #define SPEED                0.2f // (200 / 1000) Pixels per ms
-#define SPEED_VARIANCE       0.3f
+#define SPEED_DELTA_MIN      0.7f
+#define SPEED_DELTA_MAX      1.7f
 #define PULSE_NORMAL         0
 #define PULSE_EXTRA          1
 #define TRAIL_SIZE           40 // Number of cells in a trail
@@ -40,6 +41,7 @@ typedef struct pulse_s {
     int startTime;
     float dx;
     float dy;
+    float scale;
     int active;
 } pulse_t;
 
@@ -50,9 +52,8 @@ static int gWidth;
 static int gHeight;
 static int gRotate;
 
-
-int gIsPreview;
 float gXOffset;
+int gIsPreview;
 int gMode;
 
 rs_program_fragment gPFTexture;
@@ -83,6 +84,8 @@ static void setColor(int c) {
 }
 
 static void initPulse(struct pulse_s * pulse, int pulseType) {
+    float scale = rsRand(SPEED_DELTA_MIN, SPEED_DELTA_MAX);
+    pulse->scale = scale;
     gWidth = rsgGetWidth();
     gHeight = rsgGetHeight();
     if (rsRand(1.f) > 0.5f) {
@@ -91,11 +94,11 @@ static void initPulse(struct pulse_s * pulse, int pulseType) {
         if (rsRand(1.f) > 0.5f) {
             // Top
             pulse->originY = 0;
-            pulse->dy = rsRand(1.0f - SPEED_VARIANCE, 1.0 + SPEED_VARIANCE);
+            pulse->dy = scale;
         } else {
             // Bottom
-            pulse->originY = gHeight;
-            pulse->dy = -rsRand(1.0f - SPEED_VARIANCE, 1.0 + SPEED_VARIANCE);
+            pulse->originY = gHeight / scale;
+            pulse->dy = -scale;
         }
     } else {
         pulse->originY = rsRand(gHeight / PULSE_SIZE) * PULSE_SIZE;
@@ -103,11 +106,11 @@ static void initPulse(struct pulse_s * pulse, int pulseType) {
         if (rsRand(1.f) > 0.5f) {
             // Left
             pulse->originX = 0;
-            pulse->dx = rsRand(1.0f - SPEED_VARIANCE, 1.0 + SPEED_VARIANCE);
+            pulse->dx = scale;
         } else {
             // Right
-            pulse->originX = gWidth * 2;
-            pulse->dx = -rsRand(1.0f - SPEED_VARIANCE, 1.0 + SPEED_VARIANCE);
+            pulse->originX = gWidth * 2 / scale;
+            pulse->dx = -scale;
         }
     }
     pulse->startTime = gNow + rsRand(MAX_DELAY);
@@ -150,11 +153,24 @@ static void drawPulses(pulse_t * pulseSet, int setSize) {
     rsgBindProgramStore(gPSBlend);
 
     rs_matrix4x4 matrix;
+    rs_matrix4x4 modelMatrix;
     for (int i=0; i<setSize; i++) {
         struct pulse_s * p = &pulseSet[i];
         int delta = gNow - p->startTime;
 
         if (p->active != 0 && delta >= 0) {
+        
+            rsMatrixLoadIdentity(&modelMatrix);
+            if (gRotate) {
+                //matrixLoadRotate(modelMatrix, 90.0f, 0.0f, 0.0f, 1.0f);
+                //matrixTranslate(modelMatrix, 0.0f, -height, 1.0f);
+                // XXX: HAX: do not slide display in landscape
+            } else {
+                 rsMatrixTranslate(&modelMatrix, -(gXOffset * gWidth), 0, 0);
+            }
+            rsMatrixScale(&modelMatrix, p->scale, p->scale, 1.0f);
+            rsgProgramVertexLoadModelMatrix(&modelMatrix);
+
            float x = p->originX + (p->dx * SPEED * delta);
            float y = p->originY + (p->dy * SPEED * delta);
 
@@ -176,7 +192,7 @@ static void drawPulses(pulse_t * pulseSet, int setSize) {
                        0.0f);
                }
            } else if (p->dx > 0) {
-            x += PULSE_SIZE; // need to start on the other side of this cell
+               x += PULSE_SIZE; // need to start on the other side of this cell
                rsMatrixRotate(&matrix, 180.0f, 0.0f, 0.0f, 1.0f);
                rsgProgramVertexLoadTextureMatrix(&matrix);
                float xx = x - (TRAIL_SIZE * PULSE_SIZE);
@@ -239,26 +255,28 @@ static void drawPulses(pulse_t * pulseSet, int setSize) {
 void addTap(int x, int y) {
     int count = 0;
     int color = rsRand(4);
+    float scale = rsRand(0.9f, 1.9f);
     x = (x / PULSE_SIZE) * PULSE_SIZE;
     y = (y / PULSE_SIZE) * PULSE_SIZE;
     for (int i=0; i<MAX_EXTRAS; i++) {
         struct pulse_s * p = &gExtras[i];
         if (p->active == 0) {
-            p->originX = x;
-            p->originY = y;
+            p->originX = x/scale;
+            p->originY = y/scale;
+            p->scale = scale;
 
             if (count == 0) {
-                p->dx = 1.5f;
+                p->dx = scale;
                 p->dy = 0.0f;
             } else if (count == 1) {
-                p->dx = -1.5f;
+                p->dx = -scale;
                 p->dy = 0.0f;
             } else if (count == 2) {
                 p->dx = 0.0f;
-                p->dy = 1.5f;
+                p->dy = scale;
             } else if (count == 3) {
                 p->dx = 0.0f;
-                p->dy = -1.5f;
+                p->dy = -scale;
             }
 
             p->active = 1;
