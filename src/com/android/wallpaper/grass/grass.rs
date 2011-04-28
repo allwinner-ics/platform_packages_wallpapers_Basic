@@ -411,7 +411,7 @@ static void drawBlades(float brightness, float xOffset) {
     rsgDrawMesh(gBladesMesh, 0, 0, gIndexCount);
 }
 
-int root(int launchID) {
+int root(void) {
     float x = mix((float)gWidth, 0.f, gXOffset);
 
     float now = time(gIsPreview);

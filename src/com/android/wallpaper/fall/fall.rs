@@ -347,7 +347,7 @@ void addDrop(int x, int y) {
     drop(x, y, 2);
 }
 
-int root(int launchID) {
+int root(void) {
     rsgClearColor(0.f, 0.f, 0.f, 1.f);
 
     // Compute dt in seconds.
