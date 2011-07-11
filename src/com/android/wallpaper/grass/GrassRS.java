@@ -243,27 +243,28 @@ class GrassRS extends RenderScriptScene {
         mScript.set_gTSunrise(loadTexture(R.drawable.sunrise));
         mScript.set_gTSky(loadTexture(R.drawable.sky));
         mScript.set_gTSunset(loadTexture(R.drawable.sunset));
-        mScript.set_gTAa(generateTextureAlpha(4, 1, new int[] { 0x00FFFF00 }));
+        mScript.set_gTAa(generateTextureAlpha());
     }
 
-    private Allocation generateTextureAlpha(int width, int height, int[] data) {
+    private Allocation generateTextureAlpha() {
         final Type.Builder builder = new Type.Builder(mRS, A_8(mRS));
-        builder.setX(width);
-        builder.setY(height);
+        builder.setX(4);
+        builder.setY(1);
         builder.setMipmaps(true);
 
         final Allocation allocation = Allocation.createTyped(mRS, builder.create(),
                                                              Allocation.USAGE_GRAPHICS_TEXTURE);
-        int[] grey1 = new int[] {0x3f3f3f3f};
-        int[] grey2 = new int[] {0x00000000};
+        byte[] mip0 = new byte[] {0, -1, -1, 0};
+        byte[] mip1 = new byte[] {64, 64};
+        byte[] mip2 = new byte[] {0};
 
         AllocationAdapter a = AllocationAdapter.create2D(mRS, allocation);
         a.setLOD(0);
-        a.copyFrom(data);
+        a.copyFrom(mip0);
         a.setLOD(1);
-        a.copyFrom(grey1);
+        a.copyFrom(mip1);
         a.setLOD(2);
-        a.copyFrom(grey2);
+        a.copyFrom(mip2);
 
         return allocation;
     }
