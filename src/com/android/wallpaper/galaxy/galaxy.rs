@@ -147,38 +147,37 @@ static void drawSpace() {
             0.0f, gHeight, 0.0f, 0.0f, 0.0f);
 }
 
-static void drawLights() {
-    rsgBindProgramVertex(gPVBkProj);
-    rsgBindProgramFragment(gPFBackground);
-    rsgBindTexture(gPFBackground, 0, gTLight1);
-
-    float scale = 512.0f / gWidth;
-    float x = -scale - scale * 0.05f;
-    float y = -scale;
-
-    scale *= 2.0f;
-
-    rsgDrawQuad(x, y, 0.0f,
-             x + scale * 1.1f, y, 0.0f,
-             x + scale * 1.1f, y + scale, 0.0f,
-             x, y + scale, 0.0f);
-}
-
-static void drawParticles(float offset) {
+static void calcMatrix(rs_matrix4x4 *out, float offset) {
     float a = offset * angle;
     float absoluteAngle = fabs(a);
 
-    rs_matrix4x4 matrix;
-    rsMatrixLoadTranslate(&matrix, 0.0f, 0.0f, 10.0f - 6.0f * absoluteAngle / 50.0f);
+    rsMatrixLoadTranslate(out, 0.0f, 0.0f, 10.0f - 6.0f * absoluteAngle / 50.0f);
     if (gHeight > gWidth) {
-        rsMatrixScale(&matrix, 6.6f, 6.0f, 1.0f);
+        rsMatrixScale(out, 6.6f, 6.0f, 1.0f);
     } else {
-        rsMatrixScale(&matrix, 12.6f, 12.0f, 1.0f);
+        rsMatrixScale(out, 12.6f, 12.0f, 1.0f);
     }
-    rsMatrixRotate(&matrix, absoluteAngle, 1.0f, 0.0f, 0.0f);
-    rsMatrixRotate(&matrix, a, 0.0f, 0.4f, 0.1f);
+    rsMatrixRotate(out, absoluteAngle, 1.0f, 0.0f, 0.0f);
+    rsMatrixRotate(out, a, 0.0f, 0.4f, 0.1f);
+}
+
+static void drawLights(const rs_matrix4x4 *m) {
+    rsgBindProgramVertex(gPVBkProj);
+    rsgBindProgramFragment(gPFBackground);
+    rsgBindTexture(gPFBackground, 0, gTLight1);
+    rsgProgramVertexLoadModelMatrix(m);
+
+    float sx = (512.0f / gWidth) * 1.1f;
+    float sy = (512.0f / gWidth) * 1.2f;
+    rsgDrawQuad(-sx, -sy, 0.0f,
+                 sx, -sy, 0.0f,
+                 sx,  sy, 0.0f,
+                -sx,  sy, 0.0f);
+}
+
+static void drawParticles(const rs_matrix4x4 *m) {
     rsMatrixLoad(&vpConstants->MVP, &vpConstants->Proj);
-    rsMatrixMultiply(&vpConstants->MVP, &matrix);
+    rsMatrixMultiply(&vpConstants->MVP, m);
     rsgAllocationSyncAll(rsGetAllocation(vpConstants));
 
     rsgBindProgramVertex(gPVStars);
@@ -210,10 +209,12 @@ int root() {
         gOldHeight = gHeight;
     }
 
-    float offset = mix(-1.0f, 1.0f, gXOffset);
     drawSpace();
-    drawParticles(offset);
-    drawLights();
+
+    rs_matrix4x4 matrix;
+    calcMatrix(&matrix, mix(-0.5f, 0.5f, gXOffset));
+    drawParticles(&matrix);
+    drawLights(&matrix);
 
     return 45;
 }
