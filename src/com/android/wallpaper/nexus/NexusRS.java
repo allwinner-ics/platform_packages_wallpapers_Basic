@@ -159,11 +159,9 @@ class NexusRS extends RenderScriptScene {
     public Bundle onCommand(String action, int x, int y, int z, Bundle extras,
             boolean resultRequested) {
 
-        final int dw = mWidth;
-        final int bw = 960; // XXX: hardcoded width of background texture
         if (mWidth < mHeight) {
             // nexus.rs ignores the xOffset when rotated; we shall endeavor to do so as well
-            x = (int) (x + mXOffset * (bw-dw));
+            x = (int) (x + mXOffset * mWidth);
         }
 
         // android.util.Log.d("NexusRS", String.format(
