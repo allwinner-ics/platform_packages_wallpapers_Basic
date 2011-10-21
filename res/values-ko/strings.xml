@@ -31,13 +31,13 @@
     <string name="wallpaper_galaxy_desc" msgid="6816969378845338629">"부드럽게 소용돌이치는 별들로 이루어진 은하수입니다."</string>
     <string name="wallpaper_fall" msgid="1500920940722360941">"물"</string>
     <string name="wallpaper_fall_author" msgid="8860429843949521342">"Google"</string>
-    <string name="wallpaper_fall_desc" msgid="595888373487204297">"가을 낙엽&lt;br&gt; 아래의 찰랑거리는 연못까지:&lt;br&gt; 투명한 배경"</string>
+    <string name="wallpaper_fall_desc" msgid="595888373487204297">"찰랑거리는 연못으로&lt;br&gt; 떨어지는 가을 낙엽:&lt;br&gt; 투명한 배경"</string>
     <string name="wallpaper_clock" msgid="6555051461698958610">"중심축 시계"</string>
     <string name="wallpaper_clock_author" msgid="8779094427834551330">"Google"</string>
     <string name="wallpaper_clock_desc" msgid="6767980298898740026">"날짜와 시간을 시계방향 원호(월, 일, 시, 분, 초)로 표시합니다."</string>
     <string name="wallpaper_nexus" msgid="3789061608411260304">"넥서스"</string>
     <string name="wallpaper_nexus_author" msgid="8492858637541249441">"Google"</string>
-    <string name="wallpaper_nexus_desc" msgid="5562598238151885905">"신경망을 들여다봅니다."</string>
+    <string name="wallpaper_nexus_desc" msgid="5562598238151885905">"신경망 들여다보기"</string>
     <string name="clock_settings" msgid="7837858747417927288">"중심축 시계 설정"</string>
     <string name="show_seconds" msgid="8525899907567218168">"초 표시"</string>
     <string name="variable_line_width" msgid="8487094734462263605">"다양한 고리 너비"</string>
