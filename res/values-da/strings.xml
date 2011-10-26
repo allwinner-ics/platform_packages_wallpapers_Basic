@@ -37,7 +37,7 @@
     <string name="wallpaper_clock_desc" msgid="6767980298898740026">"Viser dato og klokkeslæt, som buer, der bevæger sig i urets retning: måned, dag, time, minut og sekund."</string>
     <string name="wallpaper_nexus" msgid="3789061608411260304">"Nexus"</string>
     <string name="wallpaper_nexus_author" msgid="8492858637541249441">"Google"</string>
-    <string name="wallpaper_nexus_desc" msgid="5562598238151885905">"Et kig i det neurale netværk."</string>
+    <string name="wallpaper_nexus_desc" msgid="5562598238151885905">"Et kig i det neurale netværk"</string>
     <string name="clock_settings" msgid="7837858747417927288">"Indstillinger for Polar Clock"</string>
     <string name="show_seconds" msgid="8525899907567218168">"Vis sekunder"</string>
     <string name="variable_line_width" msgid="8487094734462263605">"Forskellige ringstørrelser"</string>
